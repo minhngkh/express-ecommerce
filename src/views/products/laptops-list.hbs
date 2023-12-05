@@ -39,33 +39,60 @@
       >
         <!-- Sorty By -->
         <div>
-          <label for="SortBy" class="block text-xs font-medium text-gray-700">
+          <label for="sort" class="block text-xs font-medium text-gray-700">
             Sort By
           </label>
-
+ 
           <select
-            id="SortBy"
-            name="SortBy"
+            id="sort"
+            name="sort"  
             class="mt-1 rounded border-gray-300 py-2.5 text-sm"
-          >
-            <option value="Title, ASC">Title, ASC</option>
-            <option value="Title, DESC">Title, DESC</option>
-            <option value="Price, ASC">Price, ASC</option>
-            <option value="Price, DESC">Price, DESC</option>
+          > 
+            {{#with query}}
+              <option 
+                {{#comp sort "===" "name-asc"}} selected {{/comp}}
+                value="name-asc"
+              >
+                Name (asc)
+              </option>
+
+              <option
+                {{#comp sort "===" "name-desc"}} selected {{/comp}}
+                value="name-desc"
+              >
+                Name (desc)
+              </option>
+
+              <option
+                {{#comp sort "===" "price-asc"}} selected {{/comp}}
+                value="price-asc"
+              >
+                Price (asc)
+              </option>
+
+              <option
+                {{#comp sort "===" "price-desc"}} selected {{/comp}}
+                value="price-desc"
+              >
+                Price (desc)
+              </option>
+            {{/with}}
           </select>
-        </div>
+        </div> 
         <!-- Sorty By -->
 
         <!-- Search -->
-        <div>
+        <div x-data="{ name: '{{query.search}}' }">
           <div class="relative">
             <label for="Search" class="block text-xs font-medium text-gray-700">
               Search
             </label>
 
             <input
+              x-model="name"
               type="text"
               id="Search"
+              :name="!name ? '' : 'search'"
               placeholder="Product's name"
               class="mt-1 w-full rounded-md border-gray-200 py-2.5 pe-10 shadow-sm sm:text-sm"
             />
@@ -80,7 +107,7 @@
 
             <!-- Checkboxes -->
             <details
-              x-data="{ categories: [] }"
+              x-data="{ categories: [{{#each query.categories}}'{{this}}',{{/each}}] }"
               class="overflow-hidden rounded border border-gray-300 [&_summary::-webkit-details-marker]:hidden"
             >
               <summary
@@ -172,7 +199,7 @@
 
             <!-- Range -->
             <details
-              x-data="{ minPrice: '', maxPrice: '', priceMsg: ''}"
+              x-data="{ minPrice: '{{query.minPrice}}', maxPrice: '{{query.maxPrice}}', priceMsg: ''}"
               x-init="$watch('minPrice', (value) => minPrice = value < 0 ? '' : value ); 
                       $watch('maxPrice', (value) => maxPrice = value < 0 ? '' : value );"
               class="overflow-hidden rounded border border-gray-300 [&_summary::-webkit-details-marker]:hidden"
@@ -251,7 +278,7 @@
 
             <!-- Checkboxes -->
             <details
-              x-data="{ brands: [] }"
+              x-data="{ brands: [{{#each query.brands}}'{{this}}',{{/each}}] }"
               class="overflow-hidden rounded border border-gray-300 [&_summary::-webkit-details-marker]:hidden"
             >
               <summary
@@ -353,13 +380,13 @@
 
       <div class="lg:col-span-3">
         <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {{!-- {{#each products}}
+          {{#each products}}
             <li>
               <a href="#" class="group block overflow-hidden">
                 <img
                   src="{{image}}"
                   alt=""
-                  class="xsm:max-h-72 aspect-square object-cover transition duration-500 group-hover:scale-105"
+                  class="aspect-square object-cover transition duration-500 group-hover:scale-105 xsm:max-h-72"
                 />
 
                 <div class="relative bg-white pt-3">
@@ -378,7 +405,7 @@
                 </div>
               </a>
             </li>
-          {{/each}} --}}
+          {{/each}}
 
         </ul>
       </div>

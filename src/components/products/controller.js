@@ -1,22 +1,33 @@
 const productsService = require("./service");
 const { currencyFormatter } = require("../../utils/formatter");
 
-const supportedPages = ["laptops", "phones"];
+function processProductQuery(query) {
+  if (typeof query == "undefined") return {};
 
-exports.renderProductsList = async (req, res, next) => {
-  const productType = req.params.type;
-
-  console.log(productType);
-
-  if (!supportedPages.includes(productType)) {
-    return next(); // 404
+  if (Object.hasOwn(query, "categories")) {
+    if (!query.categories) {
+      delete query.categories;
+    } else {
+      query.categories = query.categories.split(",");
+    }
   }
-  console.log(req.query);
-  const products = await productsService.getAll(productType);
+
+  if (Object.hasOwn(query, "brands")) {
+    if (!query.brands) {
+      delete query.brands;
+    } else {
+      query.brands = query.brands.split(",");
+    }
+  }
+}
+
+exports.renderLaptopProductsList = async (req, res, _) => {
+  processProductQuery(req.query);
+  const products = await productsService.getLaptopProducts(req.query);
 
   products.forEach((e) => {
     e.price = currencyFormatter.format(e.price);
   });
 
-  res.render(`products/${productType}-list`, { products });
+  res.render(`products/laptops-list`, { products: products, query: req.query });
 };

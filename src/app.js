@@ -3,6 +3,7 @@ const express = require("express");
 const path = require("path");
 const logger = require("morgan");
 const hbs = require("hbs");
+const hbsHelpers = require("./utils/hbs-helpers");
 const passport = require("./middleware/passport");
 const session = require("./middleware/session");
 
@@ -21,11 +22,11 @@ app.set("trust proxy", 1);
 // View engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "hbs");
-// app.set("view options", { layout: "layout/default.hbs" });
 hbs.registerPartials(path.join(__dirname, "views/partials"));
-hbs.registerHelper("parseJSON", (data, options) => {
-  return options.fn(JSON.parse(data));
-});
+hbs.registerHelper("parseJSON", hbsHelpers.parseJSON);
+hbs.registerHelper("comp", hbsHelpers.comp);
+hbs.registerHelper("in", hbsHelpers.in);
+// app.set("view options", { layout: "layout/default.hbs" });
 
 app.use(logger("dev"));
 app.use(express.json());

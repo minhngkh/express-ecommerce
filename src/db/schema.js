@@ -25,7 +25,7 @@ const laptop_products = sqliteTable("laptop_products", {
   id: integer("id")
     .primaryKey()
     .references(() => products.id),
-  subcategory: text("type"),
+  subcategory: text("subcategory"),
   cpu: text("cpu"),
   resolution: text("resolution"),
   ram: text("ram"),
