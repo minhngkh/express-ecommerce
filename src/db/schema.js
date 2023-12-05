@@ -4,6 +4,7 @@ const {
   integer,
   primaryKey,
 } = require("drizzle-orm/sqlite-core");
+const { sql } = require("drizzle-orm");
 
 const users = sqliteTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -47,4 +48,20 @@ const product_reviews = sqliteTable(
   },
 );
 
-module.exports = { users, products, laptop_products, product_reviews };
+const temp_product_reviews = sqliteTable("temp_product_reviews", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  product_id: integer("product_id")
+    .notNull()
+    .references(() => products.id),
+  rating: integer("rating").notNull(),
+  comment: text("comment"),
+  date: text("date").default(sql`current_date`),
+});
+
+module.exports = {
+  users,
+  products,
+  laptop_products,
+  product_reviews,
+  temp_product_reviews,
+};

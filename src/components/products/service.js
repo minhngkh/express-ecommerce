@@ -1,11 +1,21 @@
 const db = require("../../db/client");
-const { products, laptop_products } = require("../../db/schema");
-const { eq, and, like, or, lte, gte, asc, desc } = require("drizzle-orm");
-
-exports.dbCategoryNames = {
-  laptops: "Laptops",
-  phones: "Phones",
-};
+const {
+  products,
+  laptop_products,
+  temp_product_reviews,
+} = require("../../db/schema");
+const {
+  ne,
+  eq,
+  and,
+  like,
+  or,
+  lte,
+  gte,
+  asc,
+  desc,
+  sql,
+} = require("drizzle-orm");
 
 exports.getLaptopProducts = (query) => {
   if (typeof query == "undefined") return [];
@@ -66,6 +76,7 @@ exports.getLaptopProducts = (query) => {
 
   return db
     .select({
+      id: products.id,
       name: products.name,
       price: products.price,
       image: products.image,
@@ -74,4 +85,56 @@ exports.getLaptopProducts = (query) => {
     .innerJoin(laptop_products, eq(products.id, laptop_products.id))
     .where(and(...conditions))
     .orderBy(order);
+};
+
+exports.getLaptopProductDetail = (id) => {
+  return db
+    .select({
+      name: products.name,
+      price: products.price,
+      brand: products.brand,
+      image: products.image,
+      cpu: laptop_products.cpu,
+      resolution: laptop_products.resolution,
+      ram: laptop_products.ram,
+      storage: laptop_products.storage,
+    })
+    .from(products)
+    .innerJoin(laptop_products, eq(products.id, laptop_products.id))
+    .where(eq(products.id, id))
+    .limit(1);
+};
+
+exports.getRandomProductsInCategory = (category, numProducts, except) => {
+  return db
+    .select({
+      id: products.id,
+      name: products.name,
+      price: products.price,
+      image: products.image,
+    })
+    .from(products)
+    .where(and(eq(products.category, category), ne(products.id, except)))
+    .orderBy(sql`random()`)
+    .limit(numProducts);
+};
+
+exports.addReview = (productId, rating, comment) => {
+  return db.insert(temp_product_reviews).values({
+    product_id: productId,
+    rating: rating,
+    comment: comment,
+  });
+};
+
+exports.getReviews = (productId) => {
+  return db
+    .select()
+    .from(temp_product_reviews)
+    .where(eq(temp_product_reviews.product_id, productId));
+};
+
+exports.calculateAvgRating = (ratings) => {
+  const sum = ratings.reduce((acc, e) => acc + e, 0);
+  return sum / ratings.length;
 };

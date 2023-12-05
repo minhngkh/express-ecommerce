@@ -1,4 +1,3 @@
-const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
 const logger = require("morgan");
@@ -9,9 +8,6 @@ const session = require("./middleware/session");
 
 const homeRouter = require("./components/home/router");
 const productsRouter = require("./components/products/router");
-// const authRouter = require("./components/auth/router");
-// const protectedRouter = require("./components/protected/router");
-// const testRouter = require("./components/test/router");
 
 // Init Express app
 const app = express();
@@ -40,8 +36,6 @@ app.use(passport.authenticate("session"));
 
 app.use("/", homeRouter);
 app.use("/products/", productsRouter);
-// app.use("/protected", protectedRouter);
-// app.use("/test", testRouter);
 
 // Catch 404 and forward to error handler
 app.use((req, res, _) => {

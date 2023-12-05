@@ -1,5 +1,6 @@
 const productsService = require("./service");
 const { currencyFormatter } = require("../../utils/formatter");
+const { body } = require("express-validator");
 
 function processProductQuery(query) {
   if (typeof query == "undefined") return {};
@@ -30,4 +31,53 @@ exports.renderLaptopProductsList = async (req, res, _) => {
   });
 
   res.render(`products/laptops-list`, { products: products, query: req.query });
+};
+
+exports.renderLaptopProductDetail = async (req, res, _) => {
+  const productId = req.params.id;
+  const query = await productsService.getLaptopProductDetail(productId);
+
+  const product = query[0];
+  product.price = currencyFormatter.format(product.price);
+
+  const relatedProducts = await productsService.getRandomProductsInCategory(
+    "Laptops",
+    4,
+    productId,
+  );
+
+  relatedProducts.forEach((e) => {
+    e.price = currencyFormatter.format(e.price);
+  });
+
+  const reviews = await productsService.getReviews(productId);
+  const avgRating = productsService.calculateAvgRating(
+    reviews.map((e) => e.rating),
+  );
+
+  console.log(avgRating);
+
+  res.render("products/product-detail", {
+    product,
+    relatedProducts,
+    productId,
+    avgRating,
+    reviews,
+  });
+};
+
+exports.validateReview = [
+  body("rating").notEmpty().isInt({ min: 1, max: 5 }),
+  body("comment").notEmpty().trim().escape().isLength({ min: 1, max: 1000 }),
+];
+
+exports.addReview = async (req, res, _) => {
+  const { productId, rating, comment } = req.body;
+  try {
+    await productsService.addReview(productId, rating, comment);
+  } catch (err) {
+    console.log(err);
+  }
+
+  res.redirect("back");
 };
