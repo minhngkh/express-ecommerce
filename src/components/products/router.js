@@ -6,6 +6,10 @@ router.get("/laptops", productsController.renderLaptopProductsList);
 
 router.get("/laptops/:id", productsController.renderLaptopProductDetail);
 
-router.post("/add-review", productsController.addReview);
+router.post(
+  "/add-review",
+  productsController.validateReview,
+  productsController.addReview,
+);
 
 module.exports = router;
