@@ -1,5 +1,9 @@
 const db = require("../../db/client");
-const { products, laptop_products } = require("../../db/schema");
+const {
+  products,
+  laptop_products,
+  temp_product_reviews,
+} = require("../../db/schema");
 const {
   ne,
   eq,
@@ -113,4 +117,24 @@ exports.getRandomProductsInCategory = (category, numProducts, except) => {
     .where(and(eq(products.category, category), ne(products.id, except)))
     .orderBy(sql`random()`)
     .limit(numProducts);
+};
+
+exports.addReview = (productId, rating, comment) => {
+  return db.insert(temp_product_reviews).values({
+    product_id: productId,
+    rating: rating,
+    comment: comment,
+  });
+};
+
+exports.getReviews = (productId) => {
+  return db
+    .select()
+    .from(temp_product_reviews)
+    .where(eq(temp_product_reviews.product_id, productId));
+};
+
+exports.calculateAvgRating = (ratings) => {
+  const sum = ratings.reduce((acc, e) => acc + e, 0);
+  return sum / ratings.length;
 };
