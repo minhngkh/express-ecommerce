@@ -31,3 +31,23 @@ exports.renderLaptopProductsList = async (req, res, _) => {
 
   res.render(`products/laptops-list`, { products: products, query: req.query });
 };
+
+exports.renderLaptopProductDetail = async (req, res, _) => {
+  const productId = req.params.id;
+  const query = await productsService.getLaptopProductDetail(productId);
+
+  const product = query[0];
+  product.price = currencyFormatter.format(product.price);
+
+  const relatedProducts = await productsService.getRandomProductsInCategory(
+    "Laptops",
+    4,
+    productId,
+  );
+
+  relatedProducts.forEach((e) => {
+    e.price = currencyFormatter.format(e.price);
+  });
+
+  res.render("products/product-detail", { product, relatedProducts });
+};
