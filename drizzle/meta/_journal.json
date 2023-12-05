@@ -1,0 +1,34 @@
+{
+  "version": "5",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1701659856662,
+      "tag": "0000_flashy_ma_gnuci",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1701690532329,
+      "tag": "0001_illegal_forge",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1701690636736,
+      "tag": "0002_youthful_killraven",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1701690832598,
+      "tag": "0003_fluffy_umar",
+      "breakpoints": true
+    }
+  ]
+}

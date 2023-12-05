@@ -1,0 +1,43 @@
+{
+  "name": "express-ecommerce",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "db:generate": "drizzle-kit generate:sqlite",
+    "db:push": "drizzle-kit push:sqlite",
+    "db:browser": "drizzle-kit studio",
+    "css:build": "tailwindcss -i public/styles/tailwind.css -o public/styles/style.css",
+    "css:watch": "tailwindcss -i public/styles/tailwind.css -o public/styles/style.css --watch",
+    "debug": "cross-env DEBUG=expressjs:server pnpm start",
+    "dev": "concurrently \"pnpm css:watch\" \"nodemon src/server.js\"",
+    "start": "pnpm css:build && node src/server.js"
+  },
+  "dependencies": {
+    "@libsql/client": "0.4.0-pre.5",
+    "bcrypt": "^5.1.1",
+    "connect-redis": "^7.1.0",
+    "debug": "^4.3.4",
+    "drizzle-orm": "^0.29.1",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "express-validator": "^7.0.1",
+    "hbs": "^4.2.0",
+    "http-errors": "^2.0.0",
+    "morgan": "^1.10.0",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "redis": "^4.6.11",
+    "tailwindcss": "^3.3.5"
+  },
+  "devDependencies": {
+    "@flydotio/dockerfile": "^0.4.11",
+    "@tailwindcss/forms": "^0.5.7",
+    "concurrently": "^8.2.2",
+    "dotenv": "^16.3.1",
+    "drizzle-kit": "^0.20.6",
+    "eslint": "^8.55.0",
+    "nodemon": "^3.0.2",
+    "prettier": "^3.1.0",
+    "prettier-plugin-tailwindcss": "^0.5.7"
+  }
+}
