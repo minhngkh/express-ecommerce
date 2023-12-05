@@ -51,9 +51,13 @@ exports.renderLaptopProductDetail = async (req, res, _) => {
   });
 
   const reviews = await productsService.getReviews(productId);
-  const avgRating = productsService.calculateAvgRating(
-    reviews.map((e) => e.rating),
-  );
+
+  let avgRating = null;
+  if (reviews.length) {
+    avgRating = productsService.calculateAvgRating(
+      reviews.map((e) => e.rating),
+    );
+  }
 
   console.log(avgRating);
 
@@ -68,7 +72,7 @@ exports.renderLaptopProductDetail = async (req, res, _) => {
 
 exports.validateReview = [
   body("rating").notEmpty().isInt({ min: 1, max: 5 }),
-  body("comment").notEmpty().trim().escape().isLength({ min: 1, max: 1000 }),
+  body("comment").notEmpty().trim().isLength({ min: 1, max: 1000 }),
 ];
 
 exports.addReview = async (req, res, _) => {
