@@ -119,6 +119,7 @@ exports.getRandomProductsInCategory = (category, numProducts, except) => {
     .limit(numProducts);
 };
 
+// Reviews related
 exports.addReview = (productId, rating, comment) => {
   return db.insert(temp_product_reviews).values({
     product_id: productId,
@@ -136,5 +137,5 @@ exports.getReviews = (productId) => {
 
 exports.calculateAvgRating = (ratings) => {
   const sum = ratings.reduce((acc, e) => acc + e, 0);
-  return sum / ratings.length;
+  return Math.round((sum / ratings.length) * 10) / 10;
 };
