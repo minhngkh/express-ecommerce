@@ -17,17 +17,51 @@ const {
   sql,
 } = require("drizzle-orm");
 
-exports.getLaptopProducts = (query) => {
+const minimalInfo = {
+  id: products.id,
+  name: products.name,
+  price: products.price,
+  image: products.image,
+};
+
+const generalInfo = {
+  name: products.name,
+  price: products.price,
+  brand: products.brand,
+  image: products.image,
+};
+
+const categoriesDict = {
+  laptops: {
+    table: laptop_products,
+    detailedInfo: {
+      cpu: laptop_products.cpu,
+      resolution: laptop_products.resolution,
+      ram: laptop_products.ram,
+      storage: laptop_products.storage,
+    },
+  },
+};
+
+/**
+ *
+ * @param {*} query Get products list of a category with filtering and sorting applied
+ * @param {*} category Category of the products list (laptops/phones/watches)
+ * @returns List of products with minimal info
+ */
+exports.getProductsMinimalInfoList = (query, category) => {
   if (typeof query == "undefined") return [];
 
   const conditions = [];
 
   if (Object.hasOwn(query, "categories")) {
     if (query.categories.length === 1) {
-      conditions.push(eq(laptop_products.subcategory, query.categories[0]));
+      conditions.push(
+        eq(categoriesDict[category].table.subcategory, query.categories[0]),
+      );
     } else {
       const orConditions = query.categories.map((e) =>
-        eq(laptop_products.subcategory, e),
+        eq(categoriesDict[category].table.subcategory, e),
       );
       conditions.push(or(...orConditions));
     }
@@ -75,29 +109,26 @@ exports.getLaptopProducts = (query) => {
   }
 
   return db
-    .select({
-      id: products.id,
-      name: products.name,
-      price: products.price,
-      image: products.image,
-    })
+    .select(minimalInfo)
     .from(products)
-    .innerJoin(laptop_products, eq(products.id, laptop_products.id))
+    .innerJoin(
+      categoriesDict[category].table,
+      eq(products.id, categoriesDict[category].table.id),
+    )
     .where(and(...conditions))
     .orderBy(order);
 };
 
-exports.getLaptopProductDetail = (id) => {
+/**
+ *
+ * @param {*} id Product id
+ * @returns Detailed info of the product
+ */
+exports.getProductDetail = (id, category) => {
   return db
     .select({
-      name: products.name,
-      price: products.price,
-      brand: products.brand,
-      image: products.image,
-      cpu: laptop_products.cpu,
-      resolution: laptop_products.resolution,
-      ram: laptop_products.ram,
-      storage: laptop_products.storage,
+      ...generalInfo,
+      ...categoriesDict[category].detailedInfo,
     })
     .from(products)
     .innerJoin(laptop_products, eq(products.id, laptop_products.id))
@@ -105,7 +136,7 @@ exports.getLaptopProductDetail = (id) => {
     .limit(1);
 };
 
-exports.getRandomProductsInCategory = (category, numProducts, except) => {
+exports.getRandomProducts = (category, numProducts, except) => {
   return db
     .select({
       id: products.id,

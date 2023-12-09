@@ -1,29 +1,40 @@
-<!doctype html>
+{{! #TODO: Add doctype}}
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/styles/style.css">
-    <title>Document</title>
-  </head>
-  <body
-    x-cloak
-    x-data="{'darkMode': $persist(false)}"
-    :class="{'dark' : darkMode}"
-  >
-    {{> header}}
-    {{{body}}}
-    {{> footer}}
+    <link rel="stylesheet" href="/styles/style.css" />
+    <link rel="icon" href="/images/favicon.ico" />
 
-    <!-- Alpine Plugins -->
+    {{#if title}}
+      <title>{{title}}</title>
+    {{else}}
+      <title>Shop</title>
+    {{/if}}
+
+    {{! <!-- Alpine Plugins -->
     <script
       src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"
-    ></script>
+    ></script> }}
 
     <!-- Alpine Core -->
     <script
       defer
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
     ></script>
+
+    {{#block "script"}}{{/block}}
+  </head>
+  <body
+    x-cloak
+    x-data
+    {{! x-data="{'darkMode': $persist(false)}"
+    :class="{'dark' : darkMode}" }}
+  >
+    {{#extend "header"}}{{/extend}}
+
+    {{{body}}}
+
+    {{#extend "footer"}}{{/extend}}
   </body>
 </html>

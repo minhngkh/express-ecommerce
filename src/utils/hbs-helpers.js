@@ -29,6 +29,12 @@ exports.parseJSON = (data, options) => {
   return options.fn(JSON.parse(data));
 };
 
+exports.toStringList = (list) => {
+  if (!Array.isArray(list)) return "[]";
+
+  return `[${list.map((e) => `'${e}'`).join(",")}]`;
+};
+
 exports.in = (elem, list, options) => {
   if (list.indexOf(elem) > -1) {
     return options.fn(this);
