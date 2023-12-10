@@ -25,8 +25,10 @@ exports.comp = function (v1, operator, v2, options) {
   }
 };
 
-exports.parseJSON = (data, options) => {
-  return options.fn(JSON.parse(data));
+exports.parseJsonList = (data) => {
+  const list = data.split("|");
+
+  return list.map((e) => JSON.parse(e));
 };
 
 exports.toStringList = (list) => {
