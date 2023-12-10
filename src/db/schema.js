@@ -8,9 +8,11 @@ const { sql } = require("drizzle-orm");
 
 const users = sqliteTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  username: text("username").unique().notNull(),
   email: text("email").unique().notNull(),
   password: text("password").notNull(),
+  full_name: text("full_name"),
+  avatar: text("avatar"),
+  registration_time: text("registration_time").default(sql`current_timestamp`),
 });
 
 const products = sqliteTable("products", {
