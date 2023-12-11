@@ -12,8 +12,4 @@ router.post(
   productsController.addReview,
 );
 
-router.get("/test", (req, res) => {
-  res.send(JSON.stringify(req.query));
-});
-
 module.exports = router;

@@ -131,7 +131,7 @@ exports.getProductDetail = (id, category) => {
     .limit(1);
 
   return query.then((result) => {
-    result[0];
+    return result[0];
   });
 };
 
