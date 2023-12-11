@@ -7,41 +7,49 @@ const { users } = require("../db/schema");
 const { eq } = require("drizzle-orm");
 
 passport.use(
-  new LocalStrategy(async function verify(username, password, cb) {
-    const queryResult = await db
-      .select({ password: users.password })
-      .from(users)
-      .where(eq(users.username, username))
-      .limit(1)
-      .catch((err) => {
-        return cb(err);
-      });
-
-    if (!queryResult.length) {
-      return cb(null, false, { message: "Incorrect username or password." });
-    }
-
-    const user = queryResult[0];
-
-    bcrypt.compare(password, user.password, (err, result) => {
-      if (err) {
-        return cb(err);
-      }
-
-      if (!result) {
-        return cb(null, false, {
-          message: "Incorrect username or password.",
+  new LocalStrategy(
+    {
+      usernameField: "email",
+      passwordField: "password",
+    },
+    async (email, password, cb) => {
+      const queryResult = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1)
+        .catch((err) => {
+          return cb(err);
         });
+
+      if (!queryResult.length) {
+        return cb(null, false, { message: "Incorrect email or password." });
       }
 
-      return cb(null, user);
-    });
-  }),
+      const user = queryResult[0];
+
+      console.log(user);
+
+      bcrypt.compare(password, user.password, (err, result) => {
+        if (err) {
+          return cb(err);
+        }
+
+        if (!result) {
+          return cb(null, false, {
+            message: "Incorrect email or password.",
+          });
+        }
+
+        return cb(null, user);
+      });
+    },
+  ),
 );
 
 passport.serializeUser((user, cb) => {
   process.nextTick(() => {
-    cb(null, { id: user.id, username: user.username });
+    cb(null, { id: user.id, email: user.email, avatar: user.avatar });
   });
 });
 

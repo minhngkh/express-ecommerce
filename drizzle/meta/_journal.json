@@ -43,6 +43,20 @@
       "when": 1701768574759,
       "tag": "0005_charming_hex",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1702174801746,
+      "tag": "0006_stormy_roland_deschain",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1702199897715,
+      "tag": "0007_colorful_venom",
+      "breakpoints": true
     }
   ]
 }

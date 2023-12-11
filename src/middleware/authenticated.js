@@ -1,21 +1,16 @@
+const createError = require("http-errors");
+
 exports.require = (req, res, next) => {
   if (!req.isAuthenticated()) {
-    console.log("Not authenticated");
-    return res.render("unauthorized", {
-      title: "Unauthorized",
-      buttons: [
-        { name: "Login", route: "/auth/login" },
-        { name: "Register", route: "/auth/register" },
-      ],
-    });
+    return next(createError(401));
   }
   next();
 };
 
-exports.redirect = (des) => {
+exports.redirect = (destination) => {
   return (req, res, next) => {
     if (req.isAuthenticated()) {
-      return res.redirect(des);
+      return res.redirect(destination);
     }
     next();
   };
