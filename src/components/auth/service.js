@@ -17,13 +17,17 @@ exports.createUser = (user) => {
   return bcrypt
     .hash(user.password, saltRounds)
     .then((hash) => {
-      return db
+      const query = db
         .insert(users)
         .values({
           email: user.email,
           password: hash,
         })
         .returning({ insertedId: users.id });
+
+      return query.then((result) => {
+        return result[0].insertedId;
+      });
     })
     .then((result) => {
       return result;

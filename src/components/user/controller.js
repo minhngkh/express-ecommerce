@@ -2,8 +2,8 @@ const userService = require("./service");
 const createError = require("http-errors");
 
 exports.renderProfile = async (req, res, next) => {
-  const query = await userService.getUserFullName(req.user.id);
-  if (!query.length) {
+  const fullName = await userService.getUserFullName(req.user.id);
+  if (typeof fullName === "undefined") {
     return next(createError(500));
   }
 
@@ -11,7 +11,7 @@ exports.renderProfile = async (req, res, next) => {
     title: "Profile",
     user: {
       email: req.user.email,
-      fullName: query[0].fullName,
+      fullName: fullName,
     },
   });
 };

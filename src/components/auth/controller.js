@@ -50,11 +50,10 @@ exports.authenticateSignUpCredentials = async (req, res, next) => {
   }
 
   try {
-    const createResult = await userService.createUser({
+    const id = await userService.createUser({
       email: req.body.email,
       password: req.body.password,
     });
-    const id = createResult[0].insertedId;
 
     req.login(
       {

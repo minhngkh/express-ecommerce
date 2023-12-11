@@ -75,14 +75,13 @@ exports.renderProductsList = async (req, res, next) => {
 exports.renderProductDetail = async (req, res, next) => {
   const { id, category } = req.params;
   console.log(category);
-  const query = await productsService.getProductDetail(id, category);
+  const product = await productsService.getProductDetail(id, category);
 
   // Unknown product -> 404
-  if (!query.length) {
+  if (typeof product === "undefined") {
     return next();
   }
 
-  const product = query[0];
   product.price = currencyFormatter.format(product.price);
 
   const relatedProducts = await productsService.getRandomProducts(

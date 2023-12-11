@@ -120,7 +120,7 @@ exports.getProductsMinimalInfoList = (query, category, limit) => {
  * @returns Detailed info of the product
  */
 exports.getProductDetail = (id, category) => {
-  return db
+  const query = db
     .select({
       ...generalInfo,
       ...categoriesDict[category].detailedInfo,
@@ -129,6 +129,10 @@ exports.getProductDetail = (id, category) => {
     .innerJoin(laptop_products, eq(products.id, laptop_products.id))
     .where(eq(products.id, id))
     .limit(1);
+
+  return query.then((result) => {
+    result[0];
+  });
 };
 
 /**
