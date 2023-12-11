@@ -2,38 +2,73 @@ const productsService = require("./service");
 const { currencyFormatter } = require("../../utils/formatter");
 const { body } = require("express-validator");
 
-const categoriesDict = {
-  laptops: {
-    fmtName: "Laptops",
-    func: productsService.getProductsMinimalInfoList,
-  },
-  phones: {
-    fmtName: "Phones",
-    func: undefined,
-  },
-  watches: {
-    fmtName: "Watches",
-    func: undefined,
-  },
+const fmtName = {
+  laptops: "Laptops",
+  // phones: "Phones",
+  // watches: "Watches",
 };
 
-exports.renderProductsList = async (req, res, _) => {
+const pageLimit = 6;
+exports.renderProductsList = async (req, res, next) => {
+  if (!Object.hasOwn(fmtName, req.params.category)) {
+    return next(); //404
+  }
+
   processProductQuery(req.query);
+  const params = new URLSearchParams(req.query);
+  params.delete("page");
+  const rawQuery = params.toString();
 
   const category = req.params.category;
-  const products = await productsService.getProductsMinimalInfoList(
-    req.query,
-    category,
-  );
 
-  products.forEach((e) => {
-    e.price = currencyFormatter.format(e.price);
-  });
+  let products;
+  try {
+    products = await productsService.getProductsMinimalInfoList(
+      req.query,
+      category,
+      pageLimit, // Number of products per page
+    );
+  } catch (err) {
+    return next(err);
+  }
+
+  let totalProducts, numPages, curPage;
+  if (products.length) {
+    totalProducts = await productsService.getTotalProductsOfCategory(
+      req.query,
+      category,
+    );
+    numPages = Math.ceil(totalProducts / pageLimit);
+    curPage = Number(req.query.page) || 1;
+
+    // Format raw number to currency
+    products.forEach((e) => {
+      e.price = currencyFormatter.format(e.price);
+    });
+  } else {
+    totalProducts = numPages = curPage = 0;
+  }
+
+  const filter = {
+    subcategories: await productsService.getSubcategories(category),
+    brands: await productsService.getBrands(category),
+  };
+
+  console.log(filter.brands);
 
   res.render(`products/products-list`, {
-    title: `Shop | ${categoriesDict[category].fmtName}`,
+    title: `Shop | ${fmtName[category]}`,
+    category: category,
+    filter: filter,
     products: products,
     query: req.query,
+    rawQuery: rawQuery.length ? `&${rawQuery}` : "",
+    page: {
+      total: numPages,
+      current: curPage,
+      prev: curPage - 1 == 0 ? null : curPage - 1,
+      next: curPage + 1 > numPages ? null : curPage + 1,
+    },
   });
 };
 
@@ -72,7 +107,7 @@ exports.renderProductDetail = async (req, res, next) => {
   console.log(avgRating);
 
   res.render("products/product-detail", {
-    title: `${categoriesDict[category].fmtName} | ${product.name}`,
+    title: `${fmtName[category]} | ${product.name}`,
     id,
     product,
     relatedProducts,
