@@ -1,1 +1,0 @@
-ALTER TABLE `laptop_products` RENAME COLUMN `type` TO `subcategory`;

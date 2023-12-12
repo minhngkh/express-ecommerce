@@ -5,57 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1701659856662,
-      "tag": "0000_flashy_ma_gnuci",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1701690532329,
-      "tag": "0001_illegal_forge",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1701690636736,
-      "tag": "0002_youthful_killraven",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1701690832598,
-      "tag": "0003_fluffy_umar",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1701743591011,
-      "tag": "0004_nasty_sphinx",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1701768574759,
-      "tag": "0005_charming_hex",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1702174801746,
-      "tag": "0006_stormy_roland_deschain",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "5",
-      "when": 1702199897715,
-      "tag": "0007_colorful_venom",
+      "when": 1702410605381,
+      "tag": "0000_curved_darkhawk",
       "breakpoints": true
     }
   ]

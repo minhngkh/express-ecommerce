@@ -12,7 +12,7 @@ const users = sqliteTable("users", {
   password: text("password").notNull(),
   full_name: text("full_name"),
   avatar: text("avatar"),
-  registration_time: text("registration_time").default(sql`current_timestamp`),
+  created_at: text("created_at").default(sql`current_timestamp`),
 });
 
 const products = sqliteTable("products", {
@@ -38,10 +38,11 @@ const laptop_products = sqliteTable("laptop_products", {
 const product_reviews = sqliteTable(
   "product_reviews",
   {
-    product_id: integer("product_id"),
-    user_id: integer("user_id"),
+    product_id: integer("product_id").references(() => products.id),
+    user_id: integer("user_id").references(() => users.id),
     rating: integer("rating").notNull(),
     comment: text("comment"),
+    created_at: text("created_at").default(sql`current_timestamp`),
   },
   (table) => {
     return {
