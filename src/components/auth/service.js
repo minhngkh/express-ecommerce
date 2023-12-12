@@ -20,6 +20,7 @@ exports.createUser = (user) => {
       const query = db
         .insert(users)
         .values({
+          full_name: user.name,
           email: user.email,
           password: hash,
         })

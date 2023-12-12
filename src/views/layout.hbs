@@ -37,8 +37,6 @@
       defer
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
     ></script>
-
-    {{#block "script"}}{{/block}}
   </head>
   <body
     x-cloak
@@ -51,5 +49,7 @@
     {{{body}}}
 
     {{#extend "footer"}}{{/extend}}
+
+    {{#block "script"}}{{/block}}
   </body>
 </html>

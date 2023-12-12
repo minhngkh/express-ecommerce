@@ -30,6 +30,7 @@ exports.authenticateSignInCredentials = passport.authenticate("local", {
 });
 
 exports.validateSignUpCredentials = [
+  body("name").notEmpty().withMessage("Full name is required"),
   body("email").isEmail().withMessage("Invalid email address"),
   body("password")
     .isLength({ min: 7, max: 100 })
@@ -51,6 +52,7 @@ exports.authenticateSignUpCredentials = async (req, res, next) => {
 
   try {
     const id = await userService.createUser({
+      name: req.body.name,
       email: req.body.email,
       password: req.body.password,
     });
