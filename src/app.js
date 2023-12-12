@@ -8,6 +8,7 @@ const hbsHelpers = require("./utils/hbs-helpers");
 const passport = require("./middleware/passport");
 const session = require("./middleware/session");
 
+const apiRouter = require("./api/router");
 const homeRouter = require("./components/home/router");
 const productsRouter = require("./components/products/router");
 const authRouter = require("./components/auth/router");
@@ -41,6 +42,9 @@ app.use((req, res, next) => {
   res.locals.isAuthenticated = req.isAuthenticated();
   next();
 });
+
+// Setup routes
+app.use("/api", apiRouter);
 
 app.use("/", homeRouter);
 app.use("/products", productsRouter);
