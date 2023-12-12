@@ -92,7 +92,7 @@ exports.getProductsMinimalInfoList = (query, category, limit) => {
         order = desc(products.price);
         break;
       default:
-        throw new Error("Invalid sort query");
+        break; // ignore and set to default order
     }
   }
 

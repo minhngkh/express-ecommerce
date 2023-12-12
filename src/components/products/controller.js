@@ -21,55 +21,40 @@ exports.renderProductsList = async (req, res, next) => {
 
   const category = req.params.category;
 
-  let products;
   try {
-    products = await productsService.getProductsMinimalInfoList(
-      req.query,
-      category,
-      pageLimit, // Number of products per page
+    const [products, paginationInfo, subcategories, brands] = await Promise.all(
+      [
+        productsService.getProductsMinimalInfoList(
+          req.query,
+          category,
+          pageLimit,
+        ),
+        getProductsListPaginationInfo(req.query, category),
+        productsService.getSubcategories(category),
+        productsService.getBrands(category),
+      ],
     );
-  } catch (err) {
-    return next(err);
-  }
-
-  let totalProducts, numPages, curPage;
-  if (products.length) {
-    totalProducts = await productsService.getTotalProductsOfCategory(
-      req.query,
-      category,
-    );
-    numPages = Math.ceil(totalProducts / pageLimit);
-    curPage = Number(req.query.page) || 1;
 
     // Format raw number to currency
     products.forEach((e) => {
       e.price = currencyFormatter.format(e.price);
     });
-  } else {
-    totalProducts = numPages = curPage = 0;
+
+    res.render(`products/products-list`, {
+      title: `Shop | ${fmtName[category]}`,
+      category: category,
+      filter: {
+        subcategories: subcategories,
+        brands: brands,
+      },
+      products: products,
+      query: req.query,
+      rawQuery: rawQuery.length ? `&${rawQuery}` : "",
+      page: paginationInfo,
+    });
+  } catch (err) {
+    return next(err);
   }
-
-  const filter = {
-    subcategories: await productsService.getSubcategories(category),
-    brands: await productsService.getBrands(category),
-  };
-
-  console.log(filter.brands);
-
-  res.render(`products/products-list`, {
-    title: `Shop | ${fmtName[category]}`,
-    category: category,
-    filter: filter,
-    products: products,
-    query: req.query,
-    rawQuery: rawQuery.length ? `&${rawQuery}` : "",
-    page: {
-      total: numPages,
-      current: curPage,
-      prev: curPage - 1 == 0 ? null : curPage - 1,
-      next: curPage + 1 > numPages ? null : curPage + 1,
-    },
-  });
 };
 
 exports.renderProductDetail = async (req, res, next) => {
@@ -133,10 +118,9 @@ exports.addReview = async (req, res, _) => {
 
 // Helpers
 
-/**
+/** Parse fields of query that have multiple values to arrays
  *
- * @param {*} query Product query with categories and brands fields in string
- * @returns Product query with categories and brands fields parsed into array
+ * @param {*} query Product list query
  */
 function processProductQuery(query) {
   if (typeof query == "undefined") return {};
@@ -156,4 +140,37 @@ function processProductQuery(query) {
       query.brands = query.brands.split(",");
     }
   }
+}
+
+/** Get pagination info for a product list view
+ *
+ * @param {*} query Products list query
+ * @param {String} category
+ * @returns {Promise} Pagination info
+ */
+async function getProductsListPaginationInfo(query, category) {
+  const total = await productsService.getTotalProductsOfCategory(
+    query,
+    category,
+  );
+
+  if (total === 0) {
+    return {
+      total: 0,
+      current: 0,
+      prev: null,
+      next: null,
+    };
+  }
+
+  const result = {
+    total: Math.ceil(total / pageLimit),
+    current: Number(query.page) || 1,
+    prev: undefined,
+    next: undefined,
+  };
+  result.prev = result.current === 1 ? null : result.current - 1;
+  result.next = result.current === result.total ? null : result.current + 1;
+
+  return result;
 }
