@@ -60,11 +60,9 @@ app.use((req, res, next) => {
 app.use((err, req, res, _) => {
   // Set locals, only providing error in development
   res.locals.status = err.status || 500;
-
   res.locals.message = err.status ? err.message : "Internal Server Error";
   res.locals.error = req.app.get("env") === "development" ? err : {};
 
-  // Render the error page
   res.status(res.locals.status);
   res.render("error");
 });
