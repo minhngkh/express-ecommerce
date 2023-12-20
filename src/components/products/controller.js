@@ -1,4 +1,5 @@
 const productsService = require("./service");
+const reviewsService = require("./reviews/service");
 const { currencyFormatter } = require("../../utils/formatter");
 const { body } = require("express-validator");
 
@@ -57,46 +58,53 @@ exports.renderProductsList = async (req, res, next) => {
   }
 };
 
+const relatedProductsLimit = 4;
 exports.renderProductDetail = async (req, res, next) => {
   const { id, category } = req.params;
-  console.log(category);
   const product = await productsService.getProductDetail(id, category);
 
   // Unknown product -> 404
-  if (typeof product === "undefined") {
+  if (product === null) {
     return next();
   }
-
   product.price = currencyFormatter.format(product.price);
 
-  const relatedProducts = await productsService.getRandomProducts(
-    category,
-    4, // Number of suggested products
-    id,
+  const [relatedProducts, reviews] = await Promise.all([
+    productsService
+      .getRandomProducts(category, relatedProductsLimit, id)
+      .then((val) => {
+        val.forEach((e) => {
+          e.price = currencyFormatter.format(e.price);
+        });
+        return val;
+      }),
+    reviewsService.getAllReviews(id),
+  ]);
+
+  const avgRating = reviews.length
+    ? reviewsService.calculateAvgRating(reviews)
+    : null;
+
+  // Find and take the current user's review out of the list of all reviews
+  let userReview = null;
+  const indexToRemove = reviews.findIndex(
+    (review) => review.userId === Number(req.user.id),
   );
-
-  relatedProducts.forEach((e) => {
-    e.price = currencyFormatter.format(e.price);
-  });
-
-  const reviews = await productsService.getReviews(id);
-
-  let avgRating = null;
-  if (reviews.length) {
-    avgRating = productsService.calculateAvgRating(
-      reviews.map((e) => e.rating),
-    );
+  if (indexToRemove !== -1) {
+    userReview = reviews.splice(indexToRemove, 1)[0];
   }
-
-  console.log(avgRating);
 
   res.render("products/product-detail", {
     title: `${fmtName[category]} | ${product.name}`,
-    id,
-    product,
-    relatedProducts,
-    avgRating,
-    reviews,
+    product: {
+      ...product,
+      id: id,
+    },
+    relatedProducts: relatedProducts,
+    avgRating: avgRating,
+    otherReviews: reviews,
+    userReview: userReview,
+    userId: req.user.id,
   });
 };
 

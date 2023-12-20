@@ -49,7 +49,7 @@ passport.use(
 
 passport.serializeUser((user, cb) => {
   process.nextTick(() => {
-    cb(null, { id: user.id, email: user.email, avatar: user.avatar });
+    cb(null, { id: user.id, email: user.email });
   });
 });
 

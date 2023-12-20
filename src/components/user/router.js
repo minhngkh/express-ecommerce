@@ -5,6 +5,10 @@ const authenticated = require("../../middleware/authenticated");
 
 router.use(authenticated.require);
 
-router.get("/profile", userController.renderProfile);
+router.get(
+  "/profile",
+  authenticated.updateUserInfoInSession(["fullName"]),
+  userController.renderProfile,
+);
 
 module.exports = router;

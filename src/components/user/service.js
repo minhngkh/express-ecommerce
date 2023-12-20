@@ -2,15 +2,41 @@ const db = require("../../db/client");
 const { users } = require("../../db/schema");
 const { eq } = require("drizzle-orm");
 
-exports.getUserFullName = (id) => {
-  const query = db
-    .select({
-      fullName: users.full_name,
-    })
-    .from(users)
-    .where(eq(users.id, id));
+const fieldsDict = {
+  id: users.id,
+  email: users.email,
+  fullName: users.full_name,
+  avatar: users.avatar,
+  createdAt: users.created_at,
+};
 
-  return query.then((result) => {
-    return result[0].fullName;
-  });
+/**
+ *
+ * @param {*} userId
+ * @param {*} fields
+ * @returns
+ */
+exports.getUserInfo = (userId, fields) => {
+  if (fields.length === 0) {
+    return null;
+  }
+  const selectedFields = fields
+    .filter((key) => {
+      if (key in fieldsDict) {
+        return true;
+      }
+      throw new Error(`Invalid field: ${key}`);
+    })
+    .reduce((obj, key) => {
+      obj[key] = fieldsDict[key];
+      return obj;
+    }, {});
+
+  const query = db
+    .select(selectedFields)
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  return query.then((val) => val[0]);
 };

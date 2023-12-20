@@ -7,8 +7,11 @@ const hbsLayouts = require("handlebars-layouts");
 const hbsHelpers = require("./utils/hbs-helpers");
 const passport = require("./middleware/passport");
 const session = require("./middleware/session");
+const unless = require("./middleware/unless");
+const authenticated = require("./middleware/authenticated");
 
-const apiRouter = require("./api/router");
+const apiProductRouter = require("./components/products/api/router");
+
 const homeRouter = require("./components/home/router");
 const productsRouter = require("./components/products/router");
 const authRouter = require("./components/auth/router");
@@ -27,10 +30,11 @@ hbs.registerPartials(path.join(__dirname, "views/partials"));
 hbs.registerHelper(hbsHelpers);
 hbs.registerHelper(hbsLayouts(hbs.handlebars));
 
-app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "../public")));
+
+app.use(logger("dev"));
 
 // TODO: Implement CSRF protection
 // Setup Passport
@@ -43,8 +47,22 @@ app.use((req, res, next) => {
   next();
 });
 
+// Populate user info (outside of id and email) into session if
+// authenticated, this will not call db if session already has the info
+app.use(unless("/api", authenticated.updateUserInfoInSession(["fullName"])));
+
+//Set the user info to locals for view engine access
+app.use(
+  unless("/api", (req, res, next) => {
+    if (res.locals.isAuthenticated) {
+      res.locals.user = Object.assign(req.user, req.session.userInfo);
+    }
+    next();
+  }),
+);
+
 // Setup routes
-app.use("/api", apiRouter);
+app.use("/api/products", apiProductRouter);
 
 app.use("/", homeRouter);
 app.use("/products", productsRouter);

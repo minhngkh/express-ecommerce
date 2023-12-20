@@ -2,7 +2,9 @@ const userService = require("./service");
 const createError = require("http-errors");
 
 exports.renderProfile = async (req, res, next) => {
-  const fullName = await userService.getUserFullName(req.user.id);
+  const result = await userService.getUserInfo(req.user.id, ["fullName"]);
+  const fullName = result.fullName;
+
   if (typeof fullName === "undefined") {
     return next(createError(500));
   }

@@ -1,9 +1,5 @@
 const db = require("../../db/client");
-const {
-  products,
-  laptop_products,
-  temp_product_reviews,
-} = require("../../db/schema");
+const { products, laptop_products } = require("../../db/schema");
 const {
   ne,
   eq,
@@ -131,7 +127,7 @@ exports.getProductDetail = (id, category) => {
     .limit(1);
 
   return query.then((result) => {
-    return result[0];
+    return result[0] || null;
   });
 };
 
@@ -151,7 +147,12 @@ exports.getRandomProducts = (category, numProducts, except) => {
       image: products.image,
     })
     .from(products)
-    .where(and(eq(products.category, category), ne(products.id, except)))
+    .where(
+      and(
+        eq(products.category, categoriesDict[category].fmtName),
+        ne(products.id, except),
+      ),
+    )
     .orderBy(sql`random()`)
     .limit(numProducts);
 };
@@ -177,27 +178,6 @@ exports.getSubcategories = (category) => {
     .then((result) => {
       return result.map((e) => e.subcategory);
     });
-};
-
-// Reviews related
-exports.addReview = (productId, rating, comment) => {
-  return db.insert(temp_product_reviews).values({
-    product_id: productId,
-    rating: rating,
-    comment: comment,
-  });
-};
-
-exports.getReviews = (productId) => {
-  return db
-    .select()
-    .from(temp_product_reviews)
-    .where(eq(temp_product_reviews.product_id, productId));
-};
-
-exports.calculateAvgRating = (ratings) => {
-  const sum = ratings.reduce((acc, e) => acc + e, 0);
-  return Math.round((sum / ratings.length) * 10) / 10;
 };
 
 // Helpers

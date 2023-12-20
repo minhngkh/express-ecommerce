@@ -25,6 +25,18 @@ exports.comp = function (v1, operator, v2, options) {
   }
 };
 
+exports.nullSafe = (val) => {
+  return val === null ? val : "null";
+};
+
+exports.ternary = (condition, correctVal, incorrectVal) => {
+  return condition ? correctVal : incorrectVal;
+};
+
+exports.exists = (val) => {
+  return val !== null && val !== undefined;
+};
+
 exports.parseJsonList = (data) => {
   const list = data.split("|");
 
