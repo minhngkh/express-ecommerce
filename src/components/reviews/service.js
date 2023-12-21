@@ -1,7 +1,9 @@
 // #TODO: User jsconfig file to add a path alias to src directory
-const db = require("../../../db/client");
-const { product_reviews, users } = require("../../../db/schema");
+const db = require("../../db/client");
+const { product_reviews, users } = require("../../db/schema");
 const { eq, sql, and } = require("drizzle-orm");
+
+const utcTimeField = sql`strftime('%Y-%m-%dT%H:%M:%fZ', ${product_reviews.created_at})`;
 
 exports.getAllReviews = (productId) => {
   return db
@@ -10,7 +12,7 @@ exports.getAllReviews = (productId) => {
       name: users.full_name,
       rating: product_reviews.rating,
       comment: product_reviews.comment,
-      time: sql`strftime('%Y-%m-%dT%H:%M:%fZ', ${product_reviews.created_at})`,
+      time: utcTimeField,
     })
     .from(product_reviews)
     .innerJoin(users, eq(users.id, product_reviews.user_id))
@@ -18,16 +20,23 @@ exports.getAllReviews = (productId) => {
 };
 
 exports.addReview = (productId, userId, rating, comment) => {
-  return db.insert(product_reviews).values({
-    product_id: productId,
-    user_id: userId,
-    rating,
-    comment,
-  });
+  const query = db
+    .insert(product_reviews)
+    .values({
+      product_id: productId,
+      user_id: userId,
+      rating,
+      comment,
+    })
+    .returning({
+      time: utcTimeField,
+    });
+
+  return query.then((val) => val[0]);
 };
 
 exports.updateReview = (productId, userId, rating, comment) => {
-  return db
+  const query = db
     .update(product_reviews)
     .set({
       rating,
@@ -38,7 +47,12 @@ exports.updateReview = (productId, userId, rating, comment) => {
         eq(product_reviews.product_id, productId),
         eq(product_reviews.user_id, userId),
       ),
-    );
+    )
+    .returning({
+      time: utcTimeField,
+    });
+
+  return query.then((val) => val[0]);
 };
 
 exports.deleteReview = (productId, userId) => {

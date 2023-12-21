@@ -16,6 +16,7 @@ const homeRouter = require("./components/home/router");
 const productsRouter = require("./components/products/router");
 const authRouter = require("./components/auth/router");
 const userRouter = require("./components/user/router");
+const testRouter = require("./components/test/router");
 
 // Init Express app
 const app = express();
@@ -68,6 +69,7 @@ app.use("/", homeRouter);
 app.use("/products", productsRouter);
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
+app.use("/test", testRouter);
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {

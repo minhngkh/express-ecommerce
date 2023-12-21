@@ -13,7 +13,7 @@ const fieldsDict = {
 /**
  *
  * @param {*} userId
- * @param {*} fields
+ * @param {keyof fieldsDict} fields
  * @returns
  */
 exports.getUserInfo = (userId, fields) => {

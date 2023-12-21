@@ -6,10 +6,10 @@ router.get("/:category", productsController.renderProductsList);
 
 router.get("/:category/:id", productsController.renderProductDetail);
 
-router.post(
-  "/add-review",
-  productsController.validateReview,
-  productsController.addReview,
-);
+// router.post(
+//   "/add-review",
+//   productsController.validateReview,
+//   productsController.addReview,
+// );
 
 module.exports = router;

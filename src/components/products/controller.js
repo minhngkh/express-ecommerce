@@ -1,7 +1,6 @@
 const productsService = require("./service");
-const reviewsService = require("./reviews/service");
+const reviewsService = require("../reviews/service");
 const { currencyFormatter } = require("../../utils/formatter");
-const { body } = require("express-validator");
 
 const fmtName = {
   laptops: "Laptops",
@@ -101,27 +100,12 @@ exports.renderProductDetail = async (req, res, next) => {
       id: id,
     },
     relatedProducts: relatedProducts,
-    avgRating: avgRating,
-    otherReviews: reviews,
-    userReview: userReview,
-    userId: req.user.id,
+    reviews: {
+      avgRating: avgRating,
+      others: reviews,
+      user: userReview,
+    },
   });
-};
-
-exports.validateReview = [
-  body("rating").notEmpty().isInt({ min: 1, max: 5 }),
-  body("comment").notEmpty().trim().isLength({ min: 1, max: 1000 }),
-];
-
-exports.addReview = async (req, res, _) => {
-  const { productId, rating, comment } = req.body;
-  try {
-    await productsService.addReview(productId, rating, comment);
-  } catch (err) {
-    console.log(err);
-  }
-
-  res.redirect("back");
 };
 
 // Helpers

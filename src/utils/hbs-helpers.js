@@ -26,7 +26,7 @@ exports.comp = function (v1, operator, v2, options) {
 };
 
 exports.nullSafe = (val) => {
-  return val === null ? val : "null";
+  return val !== null ? val : "null";
 };
 
 exports.ternary = (condition, correctVal, incorrectVal) => {

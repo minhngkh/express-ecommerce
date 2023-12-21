@@ -2,6 +2,8 @@ const passport = require("../../middleware/passport");
 const userService = require("./service");
 const { body } = require("express-validator");
 
+//TODO: Check validation errors
+
 exports.renderSignUpForm = (req, res, _) => {
   res.render("auth/signup", { title: "Sign up" });
 };

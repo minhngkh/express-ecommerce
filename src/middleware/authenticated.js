@@ -17,10 +17,16 @@ exports.redirect = (destination) => {
   };
 };
 
+/**
+ *
+ * @param {*} fields Array of fields contains: "id", "email", "avatar",
+ * "fullName", or "createdAt"
+ * @returns
+ */
 exports.updateUserInfoInSession = (fields) => {
   return async (req, res, next) => {
     if (!res.locals.isAuthenticated) {
-      return next(createError(401));
+      return next();
     }
 
     try {
