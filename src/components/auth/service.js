@@ -1,36 +1,49 @@
-const db = require("../../db/client");
 const bcrypt = require("bcrypt");
-const { users } = require("../../db/schema");
 const { eq } = require("drizzle-orm");
 
+const db = require("#db/client");
+const { user } = require("#db/schema");
+
+const SaltRounds = 10;
+
+/**
+ * Get user account's password by email
+ * @param {String} email
+ * @returns password
+ */
 exports.getUserPasswordByEmail = (email) => {
-  return db
-    .select({ password: users.password })
-    .from(users)
-    .where(eq(users.email, email))
+  const query = db
+    .select({ password: user.password })
+    .from(user)
+    .where(eq(user.email, email))
     .limit(1);
+
+  return query.then((val) => {
+    return val.length ? val[0].password : null;
+  });
 };
 
-const saltRounds = 10;
+/**
+ * Create user account
+ * @param {Object} userData
+ * @param {string} userData.name full name
+ * @param {string} userData.email
+ * @param {string} userData.password
+ * @returns id of the created user account
+ */
+exports.createUser = (userData) => {
+  return bcrypt.hash(userData.password, SaltRounds).then((hash) => {
+    const query = db
+      .insert(user)
+      .values({
+        fullName: userData.name,
+        email: userData.email,
+        password: hash,
+      })
+      .returning({ insertedId: user.id });
 
-exports.createUser = (user) => {
-  return bcrypt
-    .hash(user.password, saltRounds)
-    .then((hash) => {
-      const query = db
-        .insert(users)
-        .values({
-          full_name: user.name,
-          email: user.email,
-          password: hash,
-        })
-        .returning({ insertedId: users.id });
-
-      return query.then((result) => {
-        return result[0].insertedId;
-      });
-    })
-    .then((result) => {
-      return result;
+    return query.then((val) => {
+      return val[0].insertedId;
     });
+  });
 };

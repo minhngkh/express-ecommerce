@@ -1,22 +1,22 @@
 const express = require("express");
-const createError = require("http-errors");
-const path = require("path");
-const logger = require("morgan");
 const hbs = require("hbs");
 const hbsLayouts = require("handlebars-layouts");
-const hbsHelpers = require("./utils/hbs-helpers");
-const passport = require("./middleware/passport");
-const session = require("./middleware/session");
-const unless = require("./middleware/unless");
-const authenticated = require("./middleware/authenticated");
+const createError = require("http-errors");
+const logger = require("morgan");
+const path = require("path");
 
-const apiProductRouter = require("./components/products/api/router");
+const authenticated = require("#middlewares/authenticated");
+const passport = require("#middlewares/passport");
+const session = require("#middlewares/session");
+const hbsHelpers = require("#utils/hbsHelpers");
 
-const homeRouter = require("./components/home/router");
-const productsRouter = require("./components/products/router");
-const authRouter = require("./components/auth/router");
-const userRouter = require("./components/user/router");
-const testRouter = require("./components/test/router");
+const apiProductRouter = require("#components/products/api/router");
+
+const authRouter = require("#components/auth/router");
+const homeRouter = require("#components/home/router");
+const productsRouter = require("#components/products/router");
+const testRouter = require("#components/test/router");
+const userRouter = require("#components/user/router");
 
 // Init Express app
 const app = express();
@@ -48,22 +48,19 @@ app.use((req, res, next) => {
   next();
 });
 
-// Populate user info (outside of id and email) into session if
-// authenticated, this will not call db if session already has the info
-app.use(unless("/api", authenticated.updateUserInfoInSession(["fullName"])));
-
-//Set the user info to locals for view engine access
-app.use(
-  unless("/api", (req, res, next) => {
-    if (res.locals.isAuthenticated) {
-      res.locals.user = Object.assign(req.user, req.session.userInfo);
-    }
-    next();
-  }),
-);
-
 // Setup routes
 app.use("/api/products", apiProductRouter);
+
+// Populate user info (outside of id and email) into session if
+// authenticated, this will not call db if session already has the info
+app.use(authenticated.updateUserInfoInSession(["fullName"]));
+//Set the user info to locals for view engine access
+app.use((req, res, next) => {
+  if (res.locals.isAuthenticated) {
+    res.locals.user = Object.assign({}, req.user, req.session.userInfo);
+  }
+  next();
+});
 
 app.use("/", homeRouter);
 app.use("/products", productsRouter);

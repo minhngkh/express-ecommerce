@@ -22,14 +22,19 @@ exports.addReview = async (req, res, _) => {
   const { userId, rating, comment } = req.body;
 
   try {
-    const result = await reviewsService.addReview(
-      productId,
-      userId,
+    const time = await reviewsService.addReview(
+      Number(productId),
+      Number(userId),
       Number(rating),
       comment,
     );
 
-    res.status(200).json(result);
+    const newAvgRating = await reviewsService.getAvgRating(productId);
+
+    res.status(200).json({
+      time: time,
+      newAvgRating: newAvgRating,
+    });
   } catch (err) {
     console.log(err);
     res.status(400).end();
@@ -46,14 +51,19 @@ exports.updateReview = async (req, res, _) => {
 
   console.log("rating, comment", rating, comment);
   try {
-    const result = await reviewsService.updateReview(
+    const time = await reviewsService.updateReview(
       productId,
       userId,
       Number(rating),
       comment,
     );
 
-    res.status(200).json(result);
+    const newAvgRating = await reviewsService.getAvgRating(productId);
+
+    res.status(200).json({
+      time: time,
+      newAvgRating: newAvgRating,
+    });
   } catch (err) {
     res.status(400).end();
   }
@@ -65,7 +75,11 @@ exports.deleteReview = async (req, res, _) => {
   try {
     await reviewsService.deleteReview(productId, userId);
 
-    res.status(204).end();
+    const newAvgRating = await reviewsService.getAvgRating(productId);
+
+    res.status(200).json({
+      newAvgRating: newAvgRating,
+    });
   } catch (err) {
     res.status(400).end();
   }

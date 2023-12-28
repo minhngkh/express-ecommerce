@@ -1,3 +1,13 @@
 node_modules/
 public/styles/style.css
 .env
+
+client_wal_index
+local.db*
+
+.vscode/
+.github/
+
+drizzle/
+script*.sql
+scripts/

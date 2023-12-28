@@ -6,7 +6,7 @@ This is an e-commerce web application built with Express.js. It provides a platf
 
 1. Clone the repository:
   ```
-  git clone https://github.com/yourusername/express-ecommerce.git
+  git clone https://github.com/minhngkh/express-ecommerce.git
   ```
 2. Navigate into the project directory:
   ```

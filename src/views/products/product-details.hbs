@@ -3,35 +3,20 @@
     <div class="grid grid-cols-1 items-start gap-8 md:grid-cols-2">
       <div class="grid grid-cols-2 gap-4 md:grid-cols-1">
         <img
-          alt="Les Paul"
-          src="{{product.image}}"
+          alt="Primary image"
+          src="{{images.primary}}"
+          onerror="this.onerror=null; this.src='/images/placeholder/product.webp';"
           class="aspect-square w-full rounded-xl object-cover"
         />
 
         <div class="grid grid-cols-2 gap-4 lg:mt-4">
-          <img
-            alt="Les Paul"
-            src="{{product.image}}"
-            class="aspect-square w-full rounded-xl object-cover"
-          />
-
-          <img
-            alt="Les Paul"
-            src="{{product.image}}"
-            class="aspect-square w-full rounded-xl object-cover"
-          />
-
-          <img
-            alt="Les Paul"
-            src="{{product.image}}"
-            class="aspect-square w-full rounded-xl object-cover"
-          />
-
-          <img
-            alt="Les Paul"
-            src="{{product.image}}"
-            class="aspect-square w-full rounded-xl object-cover"
-          />
+          {{#each images.extras}}
+            <img
+              alt="Extra image"
+              src="{{this}}"
+              class="aspect-square w-full rounded-xl object-cover"
+            />
+          {{/each}}
         </div>
       </div>
 
@@ -332,33 +317,144 @@
             <dd class="text-gray-700 sm:col-span-2">{{product.brand}}</dd>
           </div>
 
-          <div
-            class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
-          >
-            <dt class="font-medium text-gray-900">Resolution</dt>
-            <dd class="text-gray-700 sm:col-span-2">{{product.resolution}}</dd>
-          </div>
+          {{#comp product.category "===" "laptops"}}
+            <div
+              class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
+            >
+              <dt class="font-medium text-gray-900">Screen size</dt>
+              <dd
+                class="text-gray-700 sm:col-span-2"
+              >{{product.details.screenSize}}</dd>
+            </div>
 
-          <div
-            class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
-          >
-            <dt class="font-medium text-gray-900">CPU</dt>
-            <dd class="text-gray-700 sm:col-span-2">{{product.cpu}}</dd>
-          </div>
+            <div
+              class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
+            >
+              <dt class="font-medium text-gray-900">Resolution</dt>
+              <dd
+                class="text-gray-700 sm:col-span-2"
+              >{{product.details.resolution}}</dd>
+            </div>
 
-          <div
-            class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
-          >
-            <dt class="font-medium text-gray-900">RAM</dt>
-            <dd class="text-gray-700 sm:col-span-2">{{product.ram}}</dd>
-          </div>
+            <div
+              class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
+            >
+              <dt class="font-medium text-gray-900">CPU</dt>
+              <dd
+                class="text-gray-700 sm:col-span-2"
+              >{{product.details.cpu}}</dd>
+            </div>
 
-          <div
-            class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
-          >
-            <dt class="font-medium text-gray-900">Storage</dt>
-            <dd class="text-gray-700 sm:col-span-2">{{product.storage}}</dd>
-          </div>
+            <div
+              class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
+            >
+              <dt class="font-medium text-gray-900">GPU</dt>
+              <dd
+                class="text-gray-700 sm:col-span-2"
+              >{{product.details.gpu}}</dd>
+            </div>
+
+            <div
+              class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
+            >
+              <dt class="font-medium text-gray-900">RAM</dt>
+              <dd
+                class="text-gray-700 sm:col-span-2"
+              >{{product.details.ram}}</dd>
+            </div>
+
+            <div
+              class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
+            >
+              <dt class="font-medium text-gray-900">Storage</dt>
+              <dd
+                class="text-gray-700 sm:col-span-2"
+              >{{product.details.storage}}</dd>
+            </div>
+
+            <div
+              class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
+            >
+              <dt class="font-medium text-gray-900">Ports</dt>
+              <dd
+                class="text-gray-700 sm:col-span-2"
+              >{{product.details.ports}}</dd>
+            </div>
+          {{/comp}}
+
+          {{#comp product.category "===" "phones"}}
+            <div
+              class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
+            >
+              <dt class="font-medium text-gray-900">Screen size</dt>
+              <dd
+                class="text-gray-700 sm:col-span-2"
+              >{{product.details.screenSize}}</dd>
+            </div>
+
+            <div
+              class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
+            >
+              <dt class="font-medium text-gray-900">Resolution</dt>
+              <dd
+                class="text-gray-700 sm:col-span-2"
+              >{{product.details.resolution}}</dd>
+            </div>
+
+            <div
+              class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
+            >
+              <dt class="font-medium text-gray-900">Front camera</dt>
+              <dd
+                class="text-gray-700 sm:col-span-2"
+              >{{product.details.frontCamera}}</dd>
+            </div>
+
+            <div
+              class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
+            >
+              <dt class="font-medium text-gray-900">Rear Camera</dt>
+              <dd
+                class="text-gray-700 sm:col-span-2"
+              >{{product.details.rearCamera}}</dd>
+            </div>
+
+            <div
+              class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
+            >
+              <dt class="font-medium text-gray-900">Battery</dt>
+              <dd
+                class="text-gray-700 sm:col-span-2"
+              >{{product.details.battery}}</dd>
+            </div>
+
+            <div
+              class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
+            >
+              <dt class="font-medium text-gray-900">Chip</dt>
+              <dd
+                class="text-gray-700 sm:col-span-2"
+              >{{product.details.chip}}</dd>
+            </div>
+
+            <div
+              class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
+            >
+              <dt class="font-medium text-gray-900">RAM</dt>
+              <dd
+                class="text-gray-700 sm:col-span-2"
+              >{{product.details.ram}}</dd>
+            </div>
+
+            <div
+              class="grid grid-cols-1 gap-1 p-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4"
+            >
+              <dt class="font-medium text-gray-900">Storage</dt>
+              <dd
+                class="text-gray-700 sm:col-span-2"
+              >{{product.details.storage}}</dd>
+            </div>
+          {{/comp}}
         </dl>
       </div>
     </div>
@@ -406,15 +502,12 @@
   </div>
 
   <!-- Customer Reviews -->
-  <div
-    x-data="{ avgRating: {{nullSafe reviews.avgRating}} }"
-    class="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8"
-  >
+  <div class="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
     <h2 class="text-xl font-bold sm:text-2xl">Customer Reviews</h2>
 
-    <div x-show="avgRating">
+    <div x-show="$store.avgRating.value">
       <div class="mt-4 flex items-center">
-        <p x-text="avgRating" class="mr-2 text-3xl font-medium">
+        <p x-text="$store.avgRating.value" class="mr-2 text-3xl font-medium">
           <span class="sr-only"> Average review score </span>
         </p>
 
@@ -467,7 +560,7 @@
       </div>
     </div>
 
-    <div x-show="!avgRating">
+    <div x-show="!$store.avgRating.value">
       <p class="mt-4 text-gray-700">No reviews yet.</p>
     </div>
 
@@ -627,15 +720,18 @@
 {{! prettier-ignore}}
 {{#content "script"}}
   <script>
-
     {{#if user}}
       const productId = {{product.id}};
       const user = {
         id: {{user.id}},
         fullName: "{{user.fullName}}",
-      };    
+      };
 
       document.addEventListener("alpine:init",  () => {
+        Alpine.store("avgRating", {
+          value: {{nullSafe reviews.avgRating}}
+        });
+        
         Alpine.store("userReview", {
           {{#with reviews.user}}
             
@@ -683,10 +779,14 @@
                 throw new Error(response.body);
               }
 
+              const { newAvgRating } = await response.json();
+
               this.exists = false;
               this.rating = 0;
               this.comment = "";
               this.time = "";
+
+              Alpine.store('avgRating').value = newAvgRating;
 
               this.updateInput();
 
@@ -725,6 +825,9 @@
               this.time = data["time"];
               this.rating = this.input.rating;
               this.comment = this.input.comment;
+              console.log(data)
+
+              Alpine.store('avgRating').value = data["newAvgRating"];
 
               this.showInputArea = false;
               return true;

@@ -1,75 +1,85 @@
 // #TODO: User jsconfig file to add a path alias to src directory
 const db = require("../../db/client");
-const { product_reviews, users } = require("../../db/schema");
-const { eq, sql, and } = require("drizzle-orm");
+const { productReview, user } = require("../../db/schema");
+const { eq, sql, and, avg } = require("drizzle-orm");
 
-const utcTimeField = sql`strftime('%Y-%m-%dT%H:%M:%fZ', ${product_reviews.created_at})`;
+const utcTimeField = sql`strftime('%Y-%m-%dT%H:%M:%fZ', ${productReview.createdAt})`;
 
 exports.getAllReviews = (productId) => {
   return db
     .select({
-      userId: product_reviews.user_id,
-      name: users.full_name,
-      rating: product_reviews.rating,
-      comment: product_reviews.comment,
+      userId: productReview.userId,
+      name: user.fullName,
+      rating: productReview.rating,
+      comment: productReview.comment,
       time: utcTimeField,
     })
-    .from(product_reviews)
-    .innerJoin(users, eq(users.id, product_reviews.user_id))
-    .where(eq(product_reviews.product_id, productId));
+    .from(productReview)
+    .innerJoin(user, eq(user.id, productReview.userId))
+    .where(eq(productReview.productId, productId));
 };
 
 exports.addReview = (productId, userId, rating, comment) => {
   const query = db
-    .insert(product_reviews)
+    .insert(productReview)
     .values({
-      product_id: productId,
-      user_id: userId,
-      rating,
-      comment,
+      productId: productId,
+      userId: userId,
+      rating: rating,
+      comment: comment,
     })
     .returning({
       time: utcTimeField,
     });
 
-  return query.then((val) => val[0]);
+  return query.then((val) => val[0].time);
 };
 
 exports.updateReview = (productId, userId, rating, comment) => {
   const query = db
-    .update(product_reviews)
+    .update(productReview)
     .set({
       rating,
       comment,
     })
     .where(
       and(
-        eq(product_reviews.product_id, productId),
-        eq(product_reviews.user_id, userId),
+        eq(productReview.productId, productId),
+        eq(productReview.userId, userId),
       ),
     )
     .returning({
       time: utcTimeField,
     });
 
-  return query.then((val) => val[0]);
+  return query.then((val) => val[0].time);
 };
 
 exports.deleteReview = (productId, userId) => {
   return db
-    .delete(product_reviews)
+    .delete(productReview)
     .where(
       and(
-        eq(product_reviews.product_id, productId),
-        eq(product_reviews.user_id, userId),
+        eq(productReview.productId, productId),
+        eq(productReview.userId, userId),
       ),
     );
 };
 
 const decimalPlaces = 1;
-exports.calculateAvgRating = (reviews) => {
-  const ratings = reviews.map((e) => e.rating);
-  const sum = ratings.reduce((acc, e) => acc + e, 0);
+exports.getAvgRating = (productId) => {
+  const query = db
+    .select({
+      avgRating: avg(productReview.rating),
+    })
+    .from(productReview)
+    .innerJoin(user, eq(user.id, productReview.userId))
+    .where(eq(productReview.productId, productId));
 
-  return Math.round((sum / ratings.length) * decimalPlaces) / decimalPlaces;
+  return query.then((val) => {
+    const { avgRating } = val[0];
+    return avgRating === null
+      ? null
+      : +parseFloat(avgRating).toFixed(decimalPlaces);
+  });
 };

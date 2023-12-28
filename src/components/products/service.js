@@ -1,225 +1,333 @@
-const db = require("../../db/client");
-const { products, laptop_products } = require("../../db/schema");
 const {
-  ne,
-  eq,
-  and,
-  like,
-  or,
-  lte,
-  gte,
   asc,
+  and,
   desc,
+  eq,
+  gte,
+  like,
+  lte,
+  ne,
+  or,
   sql,
   count,
 } = require("drizzle-orm");
 
-const minimalInfo = {
-  id: products.id,
-  name: products.name,
-  price: products.price,
-  image: products.image,
+const db = require("#db/client");
+const {
+  laptopProduct,
+  phoneProduct,
+  product,
+  productBrand,
+  productImage,
+  productSubcategory,
+} = require("#db/schema");
+const { omit } = require("#utils/objectHelpers");
+
+const ProductExtendedTable = {
+  laptops: laptopProduct,
+  phones: phoneProduct,
 };
 
-const generalInfo = {
-  name: products.name,
-  price: products.price,
-  brand: products.brand,
-  image: products.image,
-};
-
-const categoriesDict = {
-  laptops: {
-    fmtName: "Laptops",
-    table: laptop_products,
-    detailedInfo: {
-      cpu: laptop_products.cpu,
-      resolution: laptop_products.resolution,
-      ram: laptop_products.ram,
-      storage: laptop_products.storage,
-    },
-  },
-};
-
-exports.getTotalProductsOfCategory = (query, category) => {
-  const conditions = createConditionsList(query, category);
-  const dbQuery = db
-    .select({
-      value: count(),
-    })
-    .from(products)
-    .innerJoin(
-      categoriesDict[category].table,
-      eq(products.id, categoriesDict[category].table.id),
-    )
-    .where(and(...conditions));
-
-  return dbQuery.then((result) => {
-    return result[0].value;
-  });
-};
-
-// TODO: Validate query data right on server
-
-/** Could throw error
- *
- * @param {*} query Get products list of a category with filtering and sorting applied
- * @param {*} category Category of the products list (laptops/phones/watches)
- * @returns List of products with minimal info
+/**
+ * @enum {string}
  */
-exports.getProductsMinimalInfoList = (query, category, limit) => {
-  if (typeof query == "undefined") return [];
+const ListOrder = {
+  NameAsc: "name-asc",
+  NameDesc: "name-desc",
+  PriceAsc: "price-asc",
+  PriceDesc: "price-desc",
+};
 
-  const conditions = createConditionsList(query, category);
+/**
+ * @typedef {Object} Query
+ * @property {?string[]} subcategories
+ * @property {?string[]} brands
+ * @property {?string} name
+ * @property {?number} minPrice
+ * @property {?number} maxPrice
+ * @property {number} limit
+ * @property {number} page
+ * @property {?ListOrder} sort
+ */
 
-  let order = asc(products.name);
-  if (Object.hasOwn(query, "sort")) {
-    switch (query.sort) {
-      case "name-asc":
-        order = asc(products.name);
-        break;
-      case "name-desc":
-        order = desc(products.name);
-        break;
-      case "price-asc":
-        order = asc(products.price);
-        break;
-      case "price-desc":
-        order = desc(products.price);
-        break;
-      default:
-        break; // ignore and set to default order
-    }
-  }
+// TODO: Total purchases sort
+/**
+ * Get list of products matching query in the category
+ * @param {keyof ProductExtendedTable} category
+ * @param {Query} query
+ * @returns
+ */
+exports.getProducts = (category, query) => {
+  const { order } = processQuery(query);
+  if (order === null) return [];
 
-  let page = 1;
-  if (Object.hasOwn(query, "page")) {
-    page = Number(query.page);
-  }
+  const conditions = createConditionsList(query);
 
   return db
-    .select(minimalInfo)
-    .from(products)
+    .select({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: productImage.source,
+    })
+    .from(product)
     .innerJoin(
-      categoriesDict[category].table,
-      eq(products.id, categoriesDict[category].table.id),
+      ProductExtendedTable[category],
+      eq(product.id, ProductExtendedTable[category].productId),
+    )
+    .innerJoin(productBrand, eq(product.brandId, productBrand.id))
+    .leftJoin(
+      productSubcategory,
+      eq(product.subcategoryId, productSubcategory.id),
+    )
+    .leftJoin(
+      productImage,
+      and(
+        eq(product.id, productImage.productId),
+        eq(productImage.isPrimary, true),
+      ),
     )
     .where(and(...conditions))
     .orderBy(order)
-    .limit(limit)
-    .offset((page - 1) * limit);
+    .limit(query.limit)
+    .offset((query.page - 1) * query.limit);
 };
 
 /**
- *
- * @param {*} id Product id
- * @returns Detailed info of the product
+ * Get subcategories of available products in a category
+ * @param {keyof ProductExtendedTable} category
+ * @returns List of subcategory names
  */
-exports.getProductDetail = (id, category) => {
+exports.getAvailableSubcategories = (category) => {
   const query = db
-    .select({
-      ...generalInfo,
-      ...categoriesDict[category].detailedInfo,
+    .selectDistinct({
+      name: productSubcategory.name,
     })
-    .from(products)
-    .innerJoin(laptop_products, eq(products.id, laptop_products.id))
-    .where(eq(products.id, id))
-    .limit(1);
+    .from(productSubcategory)
+    .innerJoin(product, eq(product.subcategoryId, productSubcategory.id))
+    .innerJoin(
+      ProductExtendedTable[category],
+      eq(product.id, ProductExtendedTable[category].productId),
+    );
 
-  return query.then((result) => {
-    return result[0] || null;
+  return query.then((val) => {
+    return val.map((e) => e.name);
   });
 };
 
 /**
- *
- * @param {*} category
- * @param {*} numProducts
- * @param {*} except Product id to exclude from the result
- * @returns Random products in the same category with the given product
+ * Get brand names of available products in a category
+ * @param {keyof ProductExtendedTable} category
+ * @returns List of brand names
  */
-exports.getRandomProducts = (category, numProducts, except) => {
+exports.getAvailableBrands = (category) => {
+  const query = db
+    .selectDistinct({
+      name: productBrand.name,
+    })
+    .from(productBrand)
+    .innerJoin(product, eq(product.brandId, productBrand.id))
+    .innerJoin(
+      ProductExtendedTable[category],
+      eq(product.id, ProductExtendedTable[category].productId),
+    );
+
+  return query.then((val) => {
+    return val.map((e) => e.name);
+  });
+};
+
+/**
+ * Get details of a product
+ * @param {keyof ProductExtendedTable} category
+ * @param {number} id
+ * @returns
+ */
+exports.getProductDetails = (category, id) => {
+  const query = db
+    .select()
+    .from(product)
+    .innerJoin(
+      ProductExtendedTable[category],
+      eq(product.id, ProductExtendedTable[category].productId),
+    )
+    .innerJoin(productBrand, eq(product.brandId, productBrand.id))
+    .where(eq(product.id, id))
+    .limit(1);
+
+  return query.then((val) => {
+    if (!val.length) return null;
+
+    return {
+      id: val[0].product.id,
+      name: val[0].product.name,
+      price: val[0].product.price,
+      brand: val[0].product_brand.name,
+      status: val[0].product.status,
+      category: category,
+      details: Object.values(omit(val[0], ["product", "product_brand"]))[0],
+    };
+  });
+};
+
+exports.getProductImages = (id) => {
+  const query = db
+    .select({
+      id: productImage.id,
+      source: productImage.source,
+      isPrimary: productImage.isPrimary,
+    })
+    .from(productImage)
+    .where(eq(productImage.productId, id));
+
+  return query.then((val) => {
+    if (!val.length) return null;
+    return {
+      primary: val.find((e) => e.isPrimary === true).source,
+      extras: val.filter((e) => e.isPrimary === false).map((e) => e.source),
+    };
+  });
+};
+
+/**
+ * Get random products in the same category
+ * @param {keyof ProductExtendedTable} category
+ * @param {number} limit
+ * @param {number} exceptId
+ * @returns
+ */
+exports.getRandomProducts = (category, limit, exceptId) => {
   return db
     .select({
-      id: products.id,
-      name: products.name,
-      price: products.price,
-      image: products.image,
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: productImage.source,
     })
-    .from(products)
+    .from(product)
+    .innerJoin(
+      ProductExtendedTable[category],
+      eq(product.id, ProductExtendedTable[category].productId),
+    )
+    .leftJoin(
+      productImage,
+      and(
+        eq(product.id, productImage.productId),
+        eq(productImage.isPrimary, true),
+      ),
+    )
     .where(
       and(
-        eq(products.category, categoriesDict[category].fmtName),
-        ne(products.id, except),
+        // eq(product.subcategoryId, exceptId),
+        ne(product.id, exceptId),
       ),
     )
     .orderBy(sql`random()`)
-    .limit(numProducts);
+    .limit(limit);
 };
 
-exports.getBrands = (category) => {
-  return db
-    .selectDistinct({
-      brand: products.brand,
+/**
+ * Get number of products matching query in the category
+ * @param {keyof ProductExtendedTable} category
+ * @param {Query} query
+ * @returns
+ */
+exports.getNumProducts = (category, query) => {
+  const conditions = createConditionsList(query);
+  const dbQuery = db
+    .select({
+      count: count(),
     })
-    .from(products)
-    .where(eq(products.category, categoriesDict[category].fmtName))
-    .then((result) => {
-      return result.map((e) => e.brand);
-    });
+    .from(product)
+    .innerJoin(
+      ProductExtendedTable[category],
+      eq(product.id, ProductExtendedTable[category].productId),
+    )
+    .innerJoin(productBrand, eq(product.brandId, productBrand.id))
+    .leftJoin(
+      productSubcategory,
+      eq(product.subcategoryId, productSubcategory.id),
+    )
+    .where(and(...conditions));
+
+  return dbQuery.then((val) => {
+    return val[0].count;
+  });
 };
 
-exports.getSubcategories = (category) => {
-  return db
-    .selectDistinct({
-      subcategory: categoriesDict[category].table.subcategory,
-    })
-    .from(categoriesDict[category].table)
-    .then((result) => {
-      return result.map((e) => e.subcategory);
-    });
+// Helper functions
+
+/**
+ * Validate and add default values to query
+ * @param {Query} query
+ * @returns
+ */
+const processQuery = (query) => {
+  const result = {
+    order: null,
+  };
+
+  if (query.sort === null) {
+    result.order = asc(product.name);
+  } else {
+    switch (query.sort) {
+      case ListOrder.NameAsc:
+        result.order = asc(product.name);
+        break;
+      case ListOrder.NameDesc:
+        result.order = desc(product.name);
+        break;
+      case ListOrder.PriceAsc:
+        result.order = asc(product.price);
+        break;
+      case ListOrder.PriceDesc:
+        result.order = desc(product.price);
+        break;
+      default:
+        break;
+    }
+  }
+
+  return result;
 };
 
-// Helpers
-
-function createConditionsList(query, category) {
-  if (typeof query == "undefined") return [];
-
+/**
+ * Create conditions list from query
+ * @param {Query} query
+ * @returns
+ */
+const createConditionsList = (query) => {
   const conditions = [];
 
-  if (Object.hasOwn(query, "categories")) {
-    if (query.categories.length === 1) {
+  if (query.subcategories !== null) {
+    if (query.subcategories.length === 1) {
+      conditions.push(eq(productSubcategory.name, query.subcategories[0]));
+    } else {
       conditions.push(
-        eq(categoriesDict[category].table.subcategory, query.categories[0]),
+        or(...query.subcategories.map((s) => eq(productSubcategory.name, s))),
       );
-    } else {
-      const orConditions = query.categories.map((e) =>
-        eq(categoriesDict[category].table.subcategory, e),
-      );
-      conditions.push(or(...orConditions));
     }
   }
 
-  if (Object.hasOwn(query, "brands")) {
+  if (query.brands !== null) {
     if (query.brands.length === 1) {
-      conditions.push(eq(products.brand, query.brands[0]));
+      conditions.push(eq(productBrand.name, query.brands[0]));
     } else {
-      const orConditions = query.brands.map((e) => eq(products.brand, e));
-      conditions.push(or(...orConditions));
+      conditions.push(or(...query.brands.map((s) => eq(productBrand.name, s))));
     }
   }
 
-  if (Object.hasOwn(query, "search")) {
-    conditions.push(like(products.name, `%${query.search}%`));
+  if (query.name !== null) {
+    conditions.push(like(product.name, `%${query.name}%`));
   }
 
-  if (Object.hasOwn(query, "minPrice")) {
-    conditions.push(gte(products.price, Number(query.minPrice)));
+  if (query.minPrice !== null) {
+    conditions.push(gte(product.price, query.minPrice));
   }
 
-  if (Object.hasOwn(query, "maxPrice")) {
-    conditions.push(lte(products.price, Number(query.maxPrice)));
+  if (query.maxPrice !== null) {
+    conditions.push(lte(product.price, query.maxPrice));
   }
 
   return conditions;
-}
+};

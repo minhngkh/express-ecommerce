@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "module": "CommonJS",
+    "paths": {
+      "#components/*": [
+        "src/components/*"
+      ],
+      "#db/*": [
+        "src/db/*"
+      ],
+      "#middlewares/*": [
+        "src/middlewares/*"
+      ],
+      "#utils/*": [
+        "src/utils/*"
+      ],
+    },
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}

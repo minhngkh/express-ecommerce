@@ -1,10 +1,8 @@
+const bcrypt = require("bcrypt");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 
-const bcrypt = require("bcrypt");
-const db = require("../db/client");
-const { users } = require("../db/schema");
-const { eq } = require("drizzle-orm");
+const usersServices = require("#components/user/service");
 
 passport.use(
   new LocalStrategy(
@@ -13,35 +11,32 @@ passport.use(
       passwordField: "password",
     },
     async (email, password, cb) => {
-      const queryResult = await db
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .limit(1)
-        .catch((err) => {
-          return cb(err);
-        });
+      const account = {
+        email: email,
+      };
+      try {
+        const result = await usersServices.getUserInfoFromEmail(email, [
+          "id",
+          "password",
+        ]);
 
-      if (!queryResult.length) {
-        return cb(null, false, { message: "Incorrect email or password." });
+        Object.assign(account, result);
+      } catch (err) {
+        return cb(null, false, { message: "Incorrect email." });
       }
 
-      const user = queryResult[0];
-
-      console.log(user);
-
-      bcrypt.compare(password, user.password, (err, result) => {
+      bcrypt.compare(password, account.password, (err, result) => {
         if (err) {
           return cb(err);
         }
 
         if (!result) {
           return cb(null, false, {
-            message: "Incorrect email or password.",
+            message: "Incorrect password.",
           });
         }
 
-        return cb(null, user);
+        return cb(null, account);
       });
     },
   ),

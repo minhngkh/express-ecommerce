@@ -1,37 +1,37 @@
+const reviewsService = require("#components/reviews/service");
+const { currencyFormatter } = require("#utils/formatter");
+const { processSearchQuery } = require("./helpers");
 const productsService = require("./service");
-const reviewsService = require("../reviews/service");
-const { currencyFormatter } = require("../../utils/formatter");
 
-const fmtName = {
+/**
+ * @enum {string}
+ */
+const CategoryName = {
   laptops: "Laptops",
-  // phones: "Phones",
-  // watches: "Watches",
+  phones: "Phones",
 };
 
 const pageLimit = 6;
-exports.renderProductsList = async (req, res, next) => {
-  if (!Object.hasOwn(fmtName, req.params.category)) {
+exports.renderProductList = async (req, res, next) => {
+  if (!Object.hasOwn(CategoryName, req.params.category)) {
     return next(); //404
   }
 
-  processProductQuery(req.query);
+  const { category } = req.params;
+  const query = processSearchQuery(req.query);
+
+  // Get raw search string
   const params = new URLSearchParams(req.query);
   params.delete("page");
   const rawQuery = params.toString();
 
-  const category = req.params.category;
-
   try {
     const [products, paginationInfo, subcategories, brands] = await Promise.all(
       [
-        productsService.getProductsMinimalInfoList(
-          req.query,
-          category,
-          pageLimit,
-        ),
-        getProductsListPaginationInfo(req.query, category),
-        productsService.getSubcategories(category),
-        productsService.getBrands(category),
+        productsService.getProducts(category, query),
+        getProductListPaginationInfo(query, category),
+        productsService.getAvailableSubcategories(category),
+        productsService.getAvailableBrands(category),
       ],
     );
 
@@ -40,15 +40,16 @@ exports.renderProductsList = async (req, res, next) => {
       e.price = currencyFormatter.format(e.price);
     });
 
-    res.render(`products/products-list`, {
-      title: `Shop | ${fmtName[category]}`,
+    res.render(`products/product-list`, {
+      title: `Shop | ${CategoryName[category]}`,
+
       category: category,
       filter: {
         subcategories: subcategories,
         brands: brands,
       },
       products: products,
-      query: req.query,
+      query: query,
       rawQuery: rawQuery.length ? `&${rawQuery}` : "",
       page: paginationInfo,
     });
@@ -60,7 +61,7 @@ exports.renderProductsList = async (req, res, next) => {
 const relatedProductsLimit = 4;
 exports.renderProductDetail = async (req, res, next) => {
   const { id, category } = req.params;
-  const product = await productsService.getProductDetail(id, category);
+  const product = await productsService.getProductDetails(category, id);
 
   // Unknown product -> 404
   if (product === null) {
@@ -68,7 +69,7 @@ exports.renderProductDetail = async (req, res, next) => {
   }
   product.price = currencyFormatter.format(product.price);
 
-  const [relatedProducts, reviews] = await Promise.all([
+  const [relatedProducts, reviews, avgRating, images] = await Promise.all([
     productsService
       .getRandomProducts(category, relatedProductsLimit, id)
       .then((val) => {
@@ -78,11 +79,9 @@ exports.renderProductDetail = async (req, res, next) => {
         return val;
       }),
     reviewsService.getAllReviews(id),
+    reviewsService.getAvgRating(id),
+    productsService.getProductImages(id),
   ]);
-
-  const avgRating = reviews.length
-    ? reviewsService.calculateAvgRating(reviews)
-    : null;
 
   // Find and take the current user's review out of the list of all reviews
   let userReview = null;
@@ -93,46 +92,21 @@ exports.renderProductDetail = async (req, res, next) => {
     userReview = reviews.splice(indexToRemove, 1)[0];
   }
 
-  res.render("products/product-detail", {
-    title: `${fmtName[category]} | ${product.name}`,
-    product: {
-      ...product,
-      id: id,
-    },
+  res.render("products/product-details", {
+    title: `${CategoryName[category]} | ${product.name}`,
+
+    product: product,
     relatedProducts: relatedProducts,
     reviews: {
       avgRating: avgRating,
       others: reviews,
       user: userReview,
     },
+    images: images,
   });
 };
 
 // Helpers
-
-/** Parse fields of query that have multiple values to arrays
- *
- * @param {*} query Product list query
- */
-function processProductQuery(query) {
-  if (typeof query == "undefined") return {};
-
-  if (Object.hasOwn(query, "categories")) {
-    if (!query.categories) {
-      delete query.categories;
-    } else {
-      query.categories = query.categories.split(",");
-    }
-  }
-
-  if (Object.hasOwn(query, "brands")) {
-    if (!query.brands) {
-      delete query.brands;
-    } else {
-      query.brands = query.brands.split(",");
-    }
-  }
-}
 
 /** Get pagination info for a product list view
  *
@@ -140,11 +114,8 @@ function processProductQuery(query) {
  * @param {String} category
  * @returns {Promise} Pagination info
  */
-async function getProductsListPaginationInfo(query, category) {
-  const total = await productsService.getTotalProductsOfCategory(
-    query,
-    category,
-  );
+async function getProductListPaginationInfo(query, category) {
+  const total = await productsService.getNumProducts(category, query);
 
   if (total === 0) {
     return {

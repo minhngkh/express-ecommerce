@@ -1,6 +1,7 @@
-const passport = require("../../middleware/passport");
-const userService = require("./service");
 const { body } = require("express-validator");
+
+const passport = require("#middlewares/passport");
+const userService = require("./service");
 
 //TODO: Check validation errors
 
@@ -45,10 +46,10 @@ exports.validateSignUpCredentials = [
 ];
 
 exports.authenticateSignUpCredentials = async (req, res, next) => {
-  const findResult = await userService.getUserPasswordByEmail(req.body.email);
+  const password = await userService.getUserPasswordByEmail(req.body.email);
 
   // Existing email
-  if (findResult.length) {
+  if (password === null) {
     return res.redirect("back");
   }
 

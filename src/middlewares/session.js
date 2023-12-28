@@ -2,12 +2,10 @@ const session = require("express-session");
 const RedisStore = require("connect-redis").default;
 const RedisClient = require("./redis");
 
-const os = require("os");
-
 module.exports = session({
   store: new RedisStore({ client: RedisClient }),
   secret: process.env.SESSION_SECRET,
-  name: os.hostname(),
+  name: "user",
   resave: false,
   saveUninitialized: false,
   proxy: true,

@@ -1,18 +1,21 @@
-const db = require("../../db/client");
-const { users } = require("../../db/schema");
 const { eq } = require("drizzle-orm");
 
+const db = require("#db/client");
+const { user } = require("#db/schema");
+const { pick } = require("#utils/objectHelpers");
+
 const fieldsDict = {
-  id: users.id,
-  email: users.email,
-  fullName: users.full_name,
-  avatar: users.avatar,
-  createdAt: users.created_at,
+  id: user.id,
+  email: user.email,
+  fullName: user.fullName,
+  password: user.password,
+  avatar: user.avatar,
+  createdAt: user.createdAt,
 };
 
 /**
  *
- * @param {*} userId
+ * @param {number} userId
  * @param {keyof fieldsDict} fields
  * @returns
  */
@@ -20,22 +23,31 @@ exports.getUserInfo = (userId, fields) => {
   if (fields.length === 0) {
     return null;
   }
-  const selectedFields = fields
-    .filter((key) => {
-      if (key in fieldsDict) {
-        return true;
-      }
-      throw new Error(`Invalid field: ${key}`);
-    })
-    .reduce((obj, key) => {
-      obj[key] = fieldsDict[key];
-      return obj;
-    }, {});
 
   const query = db
-    .select(selectedFields)
-    .from(users)
-    .where(eq(users.id, userId))
+    .select(pick(fieldsDict, fields))
+    .from(user)
+    .where(eq(user.id, userId))
+    .limit(1);
+
+  return query.then((val) => val[0]);
+};
+
+/**
+ *
+ * @param {string} email
+ * @param {keyof fieldsDict} fields
+ * @returns
+ */
+exports.getUserInfoFromEmail = (email, fields) => {
+  if (fields.length === 0) {
+    return null;
+  }
+
+  const query = db
+    .select(pick(fieldsDict, fields))
+    .from(user)
+    .where(eq(user.email, email))
     .limit(1);
 
   return query.then((val) => val[0]);

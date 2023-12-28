@@ -44,10 +44,10 @@
           method="get"
           class="hidden space-y-4 lg:block"
           x-data="{ 
-          name: '{{query.search}}', 
+          name: '{{query.name}}', 
           sort : '{{query.sort}}', 
           minPrice: '{{query.minPrice}}', maxPrice: '{{query.maxPrice}}', priceMsg: '',
-          categories: {{toStringList query.categories}},
+          subcategories: {{toStringList query.subcategories}},
           brands: {{toStringList query.brands}},
 
           reset() {
@@ -67,27 +67,26 @@
             </label>
 
             <select
+              x-model="sort"
               id="sort"
               name="sort"
               class="mt-1 rounded border-gray-300 py-2.5 text-sm"
             >
-              {{#with query}}
-                <option :selected="sort === 'name-asc'" value="name-asc">
-                  Name (asc)
-                </option>
+              <option value="name-asc">
+                Name (asc)
+              </option>
 
-                <option :selected="sort === 'name-desc'" value="name-desc">
-                  Name (desc)
-                </option>
+              <option value="name-desc">
+                Name (desc)
+              </option>
 
-                <option :selected="sort === 'price-asc'" value="price-asc">
-                  Price (asc)
-                </option>
+              <option value="price-asc">
+                Price (asc)
+              </option>
 
-                <option :selected="sort === 'price-desc'" value="price-desc">
-                  Price (desc)
-                </option>
-              {{/with}}
+              <option value="price-desc">
+                Price (desc)
+              </option>
             </select>
           </div>
           <!-- Sort By -->
@@ -106,7 +105,7 @@
                 x-model="name"
                 type="text"
                 id="Search"
-                :name="!name ? '' : 'search'"
+                :name="!name ? '' : 'name'"
                 placeholder="Product's name"
                 class="mt-1 w-full rounded-md border-gray-200 py-2.5 pe-10 shadow-sm sm:text-sm"
               />
@@ -185,12 +184,12 @@
                   class="flex cursor-pointer items-center justify-between gap-2 p-2.5 text-gray-900 transition"
                 >
                   <div class="text-sm">
-                    <span class="font-medium">Categories</span>
+                    <span class="font-medium">Subcategory</span>
                     <span class="relative mx-2">
                       <p
-                        :class="categories.length ? '' : 'hidden'"
+                        :class="subcategories.length ? '' : 'hidden'"
                         class="absolute top-1/2 inline-block -translate-y-1/2 whitespace-pre rounded-full bg-teal-600 px-2 py-1 text-xs text-white"
-                        x-text="`${categories.length} selected`"
+                        x-text="`${subcategories.length} selected`"
                       ></p>
                     </span>
                   </div>
@@ -223,7 +222,7 @@
                         >
                           <input
                             type="checkbox"
-                            x-model="categories"
+                            x-model="subcategories"
                             id="{{this}}"
                             value="{{this}}"
                             class="h-5 w-5 rounded border-gray-300"
@@ -239,9 +238,9 @@
 
                   <input
                     class="hidden"
-                    name="categories"
-                    :value="categories"
-                    :disabled="!categories.length"
+                    name="subcategory"
+                    :value="subcategories"
+                    :disabled="!subcategories.length"
                   />
                 </div>
               </details>
@@ -255,7 +254,7 @@
                   class="flex cursor-pointer items-center justify-between gap-2 p-2.5 text-gray-900 transition"
                 >
                   <div class="text-sm">
-                    <span class="font-medium">Brands</span>
+                    <span class="font-medium">Brand</span>
                     <span class="relative mx-2">
                       <p
                         :class="brands.length ? '' : 'hidden'"
@@ -309,7 +308,7 @@
 
                   <input
                     class="hidden"
-                    name="brands"
+                    name="brand"
                     :value="brands"
                     :disabled="!brands.length"
                   />
@@ -349,12 +348,13 @@
             {{#each products}}
               <li>
                 <a
-                  href="/products/laptops/{{id}}"
+                  href="/products/{{{../category}}}/{{id}}"
                   class="group block overflow-hidden"
                 >
                   <img
                     src="{{image}}"
                     alt=""
+                    onerror="this.onerror=null; this.src='/images/placeholder/product.webp';"
                     class="aspect-square object-cover transition duration-500 group-hover:scale-105 xsm:max-h-72"
                   />
 
