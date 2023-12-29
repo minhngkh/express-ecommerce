@@ -67,11 +67,50 @@
           {{! #TODO: Password confirmation on client instead? }}
           <!-- Form -->
           <form
-            x-data="{ emailValidity: true, passwordValidity: true, passwordConfirmationValidity: true}"
+            x-data="{ nameValidity: true, emailValidity: true, passwordValidity: true, passwordConfirmationValidity: true}"
             action="/auth/signup"
             method="post"
           >
             <div class="grid gap-y-4">
+              <!-- Form Group -->
+              <div>
+                <label
+                  for="name"
+                  class="mb-2 block text-sm dark:text-white"
+                >Full name</label>
+                <div class="relative">
+                  <input
+                    :class="nameValidity ? 'border-gray-200 focus:border-blue-500 focus:ring-blue-500' : 'border-red-500 focus:border-red-500 focus:ring-red-500'"
+                    x-ref="name"
+                    type="text"
+                    id="name"
+                    name="name"
+                    class="block w-full rounded-lg px-4 py-3 text-sm disabled:pointer-events-none disabled:opacity-50 dark:border-gray-700 dark:bg-slate-900 dark:text-gray-400 dark:focus:ring-gray-600"
+                    required
+                    aria-describedby="name-error"
+                    autocomplete="name"
+                  />
+                  <div
+                    :class="nameValidity ? 'hidden' : ''"
+                    class="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-3"
+                  >
+                    <svg
+                      class="h-5 w-5 text-red-500"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      viewBox="0 0 16 16"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <!-- End Form Group -->
+
               <!-- Form Group -->
               <div>
                 <label
@@ -203,6 +242,7 @@
 
               <button
                 @click="
+                  nameValidity = $refs.name.checkValidity();
                   emailValidity = $refs.email.checkValidity();
                   passwordValidity = $refs.password.checkValidity(); 
                   passwordConfirmationValidity = $refs.passwordConfirmation.checkValidity();"

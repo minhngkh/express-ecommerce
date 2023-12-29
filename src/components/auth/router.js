@@ -1,7 +1,9 @@
 const express = require("express");
-const router = express.Router();
+
+const authenticated = require("#middlewares/authenticated");
 const authController = require("./controller");
-const authenticated = require("../../middleware/authenticated");
+
+const router = express.Router();
 
 router.get("/signup", authController.renderSignUpForm);
 

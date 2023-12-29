@@ -1,3 +1,12 @@
 node_modules/
 public/styles/style.css
 .env
+
+client_wal_index
+local.db*
+
+.vscode
+
+drizzle/
+drizzle/!localdb.config.js
+script*.sql

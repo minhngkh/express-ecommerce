@@ -1,17 +1,22 @@
 const express = require("express");
-const createError = require("http-errors");
-const path = require("path");
-const logger = require("morgan");
 const hbs = require("hbs");
 const hbsLayouts = require("handlebars-layouts");
-const hbsHelpers = require("./utils/hbs-helpers");
-const passport = require("./middleware/passport");
-const session = require("./middleware/session");
+const createError = require("http-errors");
+const logger = require("morgan");
+const path = require("path");
 
-const homeRouter = require("./components/home/router");
-const productsRouter = require("./components/products/router");
-const authRouter = require("./components/auth/router");
-const userRouter = require("./components/user/router");
+const authenticated = require("#middlewares/authenticated");
+const passport = require("#middlewares/passport");
+const session = require("#middlewares/session");
+const hbsHelpers = require("#utils/hbsHelpers");
+
+const apiProductRouter = require("#components/products/api/router");
+
+const authRouter = require("#components/auth/router");
+const homeRouter = require("#components/home/router");
+const productsRouter = require("#components/products/router");
+const testRouter = require("#components/test/router");
+const userRouter = require("#components/user/router");
 
 // Init Express app
 const app = express();
@@ -26,10 +31,11 @@ hbs.registerPartials(path.join(__dirname, "views/partials"));
 hbs.registerHelper(hbsHelpers);
 hbs.registerHelper(hbsLayouts(hbs.handlebars));
 
-app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "../public")));
+
+app.use(logger("dev"));
 
 // TODO: Implement CSRF protection
 // Setup Passport
@@ -42,10 +48,25 @@ app.use((req, res, next) => {
   next();
 });
 
+// Setup routes
+app.use("/api/products", apiProductRouter);
+
+// Populate user info (outside of id and email) into session if
+// authenticated, this will not call db if session already has the info
+app.use(authenticated.updateUserInfoInSession(["fullName"]));
+//Set the user info to locals for view engine access
+app.use((req, res, next) => {
+  if (res.locals.isAuthenticated) {
+    res.locals.user = Object.assign({}, req.user, req.session.userInfo);
+  }
+  next();
+});
+
 app.use("/", homeRouter);
 app.use("/products", productsRouter);
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
+app.use("/test", testRouter);
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
@@ -56,11 +77,9 @@ app.use((req, res, next) => {
 app.use((err, req, res, _) => {
   // Set locals, only providing error in development
   res.locals.status = err.status || 500;
-
   res.locals.message = err.status ? err.message : "Internal Server Error";
   res.locals.error = req.app.get("env") === "development" ? err : {};
 
-  // Render the error page
   res.status(res.locals.status);
   res.render("error");
 });

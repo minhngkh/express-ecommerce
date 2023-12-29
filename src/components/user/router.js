@@ -1,10 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("./controller");
-const authenticated = require("../../middleware/authenticated");
+const authenticated = require("../../middlewares/authenticated");
 
 router.use(authenticated.require);
 
-router.get("/profile", userController.renderProfile);
+router.get(
+  "/profile",
+  authenticated.updateUserInfoInSession(["fullName"]),
+  userController.renderProfile,
+);
 
 module.exports = router;

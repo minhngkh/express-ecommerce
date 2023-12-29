@@ -1,9 +1,8 @@
-# fly.toml app configuration file generated for express-ecommerce-final on 2023-12-09T08:08:34+07:00
+# fly.toml app configuration file generated for ee-dev on 2023-12-28T15:05:01+07:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "express-ecommerce-final"
 primary_region = "hkg"
 
 [build]

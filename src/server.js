@@ -4,7 +4,7 @@
  * Load env variables
  */
 
-require("./utils/load-env");
+require("#utils/envLoader");
 
 /**
  * Module dependencies.
