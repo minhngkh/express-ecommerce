@@ -1,4 +1,4 @@
-const { sql } = require("drizzle-orm");
+const { eq, sql } = require("drizzle-orm");
 const {
   integer,
   foreignKey,
@@ -150,7 +150,9 @@ const productImage = sqliteTable(
     return {
       productIdIsPrimaryUnique: uniqueIndex(
         "ux__product_image__product_id__is_primary",
-      ).on(table.productId, table.isPrimary),
+      )
+        .on(table.productId, table.isPrimary)
+        .where(eq(table.isPrimary, true)),
     };
   },
 );

@@ -40,7 +40,7 @@
         <!-- Desktop Filters & Sorting -->
         <form
           id="myForm"
-          action="/products/laptops/"
+          action="/products/{{category}}/"
           method="get"
           class="hidden space-y-4 lg:block"
           x-data="{ 
@@ -355,7 +355,7 @@
                     src="{{image}}"
                     alt=""
                     onerror="this.onerror=null; this.src='/images/placeholder/product.webp';"
-                    class="aspect-square object-cover transition duration-500 group-hover:scale-105 xsm:max-h-72"
+                    class="aspect-[3/2] object-cover transition duration-500 group-hover:scale-105 xsm:max-h-72"
                   />
 
                   <div class="relative bg-white pt-3">
