@@ -10,3 +10,5 @@ local.db*
 drizzle/
 drizzle/!localdb.config.js
 script*.sql
+
+data.sqld/
