@@ -10,7 +10,7 @@ const CategoryPath = {
 };
 
 exports.displayCart = async (req, res, next) => {
-  let cartItems = null;
+  let cartItems = [];
   try {
     if (!req.session.cartId) {
       req.session.cartId = await cartService.createCart(

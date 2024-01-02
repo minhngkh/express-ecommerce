@@ -18,7 +18,7 @@ exports.signOut = (req, res, next) => {
     if (err) {
       return next(err);
     }
-    res.redirect("/");
+    res.redirect(req.query.next || "/");
   });
 };
 
@@ -28,9 +28,12 @@ exports.validateSignInCredentials = [
 ];
 
 exports.authenticateSignInCredentials = passport.authenticate("local", {
-  successRedirect: "/",
-  failureRedirect: "/auth/signin",
+  failureRedirect: "back",
 });
+
+exports.redirectOnSuccess = (req, res, _) => {
+  res.redirect(req.query.next || "/");
+};
 
 exports.validateSignUpCredentials = [
   body("name").notEmpty().withMessage("Full name is required"),
@@ -46,10 +49,10 @@ exports.validateSignUpCredentials = [
 ];
 
 exports.authenticateSignUpCredentials = async (req, res, next) => {
-  const password = await userService.getUserPasswordByEmail(req.body.email);
+  const userExists = await userService.existsUser(req.body.email);
 
   // Existing email
-  if (password === null) {
+  if (userExists) {
     return res.redirect("back");
   }
 
@@ -69,7 +72,7 @@ exports.authenticateSignUpCredentials = async (req, res, next) => {
         if (err) {
           return next(err);
         }
-        res.redirect("/");
+        next();
       },
     );
   } catch (err) {

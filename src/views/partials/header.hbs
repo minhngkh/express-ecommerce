@@ -74,12 +74,12 @@
           {{#if isAuthenticated}}
             {{#extend
               "auth_buttons"
-              buttons='{"name": "Sign out", "link": "/auth/signout"} | { "name": "Profile", "link": "/user/profile", "withAccent": true }'
+              buttons='{"name": "Sign out", "link": "/auth/signout?next=${window.location.href}"} | { "name": "Profile", "link": "/user/profile", "withAccent": true }'
             }}{{/extend}}
           {{else}}
             {{#extend
               "auth_buttons"
-              buttons='{"name": "Sign in", "link": "/auth/signin"} | { "name": "Sign up", "link": "/auth/signup", "withAccent": true }'
+              buttons='{"name": "Sign in", "link": "/auth/signin?next=${window.location.href}"} | { "name": "Sign up", "link": "/auth/signup?next=${window.location.href}", "withAccent": true }'
             }}{{/extend}}
           {{/if}}
         {{/block}}
