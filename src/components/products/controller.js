@@ -85,16 +85,19 @@ exports.renderProductDetail = async (req, res, next) => {
 
   // Find and take the current user's review out of the list of all reviews
   let userReview = null;
-  const indexToRemove = reviews.findIndex(
-    (review) => review.userId === Number(req.user.id),
-  );
-  if (indexToRemove !== -1) {
-    userReview = reviews.splice(indexToRemove, 1)[0];
+  if (res.locals.isAuthenticated) {
+    const indexToRemove = reviews.findIndex(
+      (review) => review.userId === Number(req.user.id),
+    );
+    if (indexToRemove !== -1) {
+      userReview = reviews.splice(indexToRemove, 1)[0];
+    }
   }
 
   res.render("products/product-details", {
     title: `${CategoryName[category]} | ${product.name}`,
 
+    category: category,
     product: product,
     relatedProducts: relatedProducts,
     reviews: {

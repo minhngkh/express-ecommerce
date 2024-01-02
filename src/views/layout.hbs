@@ -1,3 +1,4 @@
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -49,6 +50,59 @@
     {{{body}}}
 
     {{#extend "footer"}}{{/extend}}
+
+    {{#extend "toast"}}{{/extend}}
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const toastParams = localStorage.getItem('toast');
+
+        if (toastParams) {
+          toast(...JSON.parse(toastParams));
+          localStorage.removeItem('toast');
+        }
+      });
+
+      const toast = ('notify', (message, options = {}) => {
+        let description = '';
+        let type = 'default';
+        let position = 'top-right';
+        let html = '';
+        if(typeof options.description != 'undefined') description = options.description;
+        if(typeof options.type != 'undefined') type = options.type;
+        if(typeof options.position != 'undefined') position = options.position;
+        if(typeof options.html != 'undefined') html = options.html;
+        
+        window.dispatchEvent(new CustomEvent('toast-show', 
+          { 
+            detail : { 
+              type: type, 
+              message: message, 
+              description: description, 
+              position : position, 
+              html: html 
+            }
+          }
+        ));
+      });
+
+      const debounce = (func, timeout = 300) => {
+        let timer;
+        return (...args) => {
+          clearTimeout(timer);
+          timer = setTimeout(() => { func.apply(this, args); }, timeout);
+        };
+      }
+
+      const toLocalDate = (time) => {
+        if (!time) {
+          return "";
+        }
+
+        const date = new Date(time);
+        return date.toISOString().split('T')[0];
+      }
+    </script>
 
     {{#block "script"}}{{/block}}
   </body>

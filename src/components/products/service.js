@@ -76,7 +76,7 @@ exports.getProducts = (category, query) => {
       eq(product.id, ProductExtendedTable[category].productId),
     )
     .innerJoin(productBrand, eq(product.brandId, productBrand.id))
-    .leftJoin(
+    .innerJoin(
       productSubcategory,
       eq(product.subcategoryId, productSubcategory.id),
     )

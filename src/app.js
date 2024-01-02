@@ -10,9 +10,11 @@ const passport = require("#middlewares/passport");
 const session = require("#middlewares/session");
 const hbsHelpers = require("#utils/hbsHelpers");
 
+const apiCartRouter = require("#components/cart/api/router");
 const apiProductRouter = require("#components/products/api/router");
 
 const authRouter = require("#components/auth/router");
+const cartRouter = require("#components/cart/router");
 const homeRouter = require("#components/home/router");
 const productsRouter = require("#components/products/router");
 const testRouter = require("#components/test/router");
@@ -50,6 +52,7 @@ app.use((req, res, next) => {
 
 // Setup routes
 app.use("/api/products", apiProductRouter);
+app.use("/api/cart", apiCartRouter);
 
 // Populate user info (outside of id and email) into session if
 // authenticated, this will not call db if session already has the info
@@ -63,10 +66,11 @@ app.use((req, res, next) => {
 });
 
 app.use("/", homeRouter);
-app.use("/products", productsRouter);
 app.use("/auth", authRouter);
-app.use("/user", userRouter);
+app.use("/cart", cartRouter);
+app.use("/products", productsRouter);
 app.use("/test", testRouter);
+app.use("/user", userRouter);
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {

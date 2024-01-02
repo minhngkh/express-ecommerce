@@ -1,6 +1,9 @@
 <section>
+  <!-- Product -->
   <div class="relative mx-auto max-w-screen-xl px-4 py-8">
+    <!-- Product general details -->
     <div class="grid grid-cols-1 items-start gap-8 md:grid-cols-2">
+      <!-- Product images -->
       <div class="grid grid-cols-2 gap-4 md:grid-cols-1">
         <img
           alt="Primary image"
@@ -19,7 +22,9 @@
           {{/each}}
         </div>
       </div>
+      <!-- Product images -->
 
+      <!-- Product info -->
       <div class="sticky top-0">
         {{! <strong
           class="rounded-full border border-blue-600 bg-gray-100 px-3 py-0.5 text-xs font-medium tracking-wide text-blue-600"
@@ -135,168 +140,81 @@
           </div>
         </details>
 
-        <form class="mt-8">
-          {{! <fieldset>
-            <legend class="mb-1 text-sm font-medium">Color</legend>
+        <form
+          action="/cart/"
+          method="post"
+          x-data="{ quantity: 1 }"
+          class="mt-8"
+        >
+          <div class="flex">
+            <!-- Input Number -->
+            <div class="inline-block py-2 pr-3">
+              <label for="quantity" class="sr-only">Quantity</label>
 
-            <div class="flow-root">
-              <div class="-m-0.5 flex flex-wrap">
-                <label for="color_tt" class="cursor-pointer p-0.5">
-                  <input
-                    type="radio"
-                    name="color"
-                    id="color_tt"
-                    class="peer sr-only"
-                  />
-
-                  <span
-                    class="group inline-block rounded-full border px-3 py-1 text-xs font-medium peer-checked:bg-black peer-checked:text-white"
-                  >
-                    Texas Tea
-                  </span>
-                </label>
-
-                <label for="color_fr" class="cursor-pointer p-0.5">
-                  <input
-                    type="radio"
-                    name="color"
-                    id="color_fr"
-                    class="peer sr-only"
-                  />
-
-                  <span
-                    class="group inline-block rounded-full border px-3 py-1 text-xs font-medium peer-checked:bg-black peer-checked:text-white"
-                  >
-                    Fiesta Red
-                  </span>
-                </label>
-
-                <label for="color_cb" class="cursor-pointer p-0.5">
-                  <input
-                    type="radio"
-                    name="color"
-                    id="color_cb"
-                    class="peer sr-only"
-                  />
-
-                  <span
-                    class="group inline-block rounded-full border px-3 py-1 text-xs font-medium peer-checked:bg-black peer-checked:text-white"
-                  >
-                    Cobalt Blue
-                  </span>
-                </label>
+              <div class="flex items-center gap-x-1.5">
+                <button
+                  @click="quantity = quantity > 1 ? quantity - 1 : 1"
+                  :disabled="quantity <= 1"
+                  type="button"
+                  class="inline-flex h-6 w-6 items-center justify-center gap-x-2 rounded-md border border-gray-200 bg-white text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-700 dark:bg-slate-900 dark:text-white dark:hover:bg-gray-800 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                >
+                  <svg
+                    class="h-3.5 w-3.5 flex-shrink-0"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ><path d="M5 12h14" /></svg>
+                </button>
+                <input
+                  x-model.number="quantity"
+                  id="quantity"
+                  class="w-6 border-0 bg-transparent p-0 text-center text-gray-800 focus:ring-0 dark:text-white"
+                  type="text"
+                />
+                <button
+                  @click="quantity = quantity + 1"
+                  type="button"
+                  class="inline-flex h-6 w-6 items-center justify-center gap-x-2 rounded-md border border-gray-200 bg-white text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-700 dark:bg-slate-900 dark:text-white dark:hover:bg-gray-800 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                >
+                  <svg
+                    class="h-3.5 w-3.5 flex-shrink-0"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+                </button>
               </div>
             </div>
-          </fieldset> }}
-
-          {{! <fieldset class="mt-4">
-            <legend class="mb-1 text-sm font-medium">Size</legend>
-
-            <div class="flow-root">
-              <div class="-m-0.5 flex flex-wrap">
-                <label for="size_xs" class="cursor-pointer p-0.5">
-                  <input
-                    type="radio"
-                    name="size"
-                    id="size_xs"
-                    class="peer sr-only"
-                  />
-
-                  <span
-                    class="group inline-flex h-8 w-8 items-center justify-center rounded-full border text-xs font-medium peer-checked:bg-black peer-checked:text-white"
-                  >
-                    XS
-                  </span>
-                </label>
-
-                <label for="size_s" class="cursor-pointer p-0.5">
-                  <input
-                    type="radio"
-                    name="size"
-                    id="size_s"
-                    class="peer sr-only"
-                  />
-
-                  <span
-                    class="group inline-flex h-8 w-8 items-center justify-center rounded-full border text-xs font-medium peer-checked:bg-black peer-checked:text-white"
-                  >
-                    S
-                  </span>
-                </label>
-
-                <label for="size_m" class="cursor-pointer p-0.5">
-                  <input
-                    type="radio"
-                    name="size"
-                    id="size_m"
-                    class="peer sr-only"
-                  />
-
-                  <span
-                    class="group inline-flex h-8 w-8 items-center justify-center rounded-full border text-xs font-medium peer-checked:bg-black peer-checked:text-white"
-                  >
-                    M
-                  </span>
-                </label>
-
-                <label for="size_l" class="cursor-pointer p-0.5">
-                  <input
-                    type="radio"
-                    name="size"
-                    id="size_l"
-                    class="peer sr-only"
-                  />
-
-                  <span
-                    class="group inline-flex h-8 w-8 items-center justify-center rounded-full border text-xs font-medium peer-checked:bg-black peer-checked:text-white"
-                  >
-                    L
-                  </span>
-                </label>
-
-                <label for="size_xl" class="cursor-pointer p-0.5">
-                  <input
-                    type="radio"
-                    name="size"
-                    id="size_xl"
-                    class="peer sr-only"
-                  />
-
-                  <span
-                    class="group inline-flex h-8 w-8 items-center justify-center rounded-full border text-xs font-medium peer-checked:bg-black peer-checked:text-white"
-                  >
-                    XL
-                  </span>
-                </label>
-              </div>
-            </div>
-          </fieldset> }}
-
-          <div class="mt-8 flex">
-            <div>
-              <label for="quantity" class="sr-only">Qty</label>
-
-              <input
-                type="number"
-                id="quantity"
-                min="1"
-                value="1"
-                class="w-12 rounded border-gray-200 py-3 text-center text-xs [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
-              />
-            </div>
+            <!-- End Input Number -->
 
             <button
+              @click.prevent="await addItemToCart(quantity); quantity = 1;"
+              :disabled="quantity < 1"
               type="submit"
-              class="ml-3 block rounded bg-teal-600 px-5 py-3 text-xs font-medium text-white hover:bg-teal-700"
+              class="ml-3 block rounded bg-teal-600 px-5 py-3 text-xs font-medium text-white hover:bg-teal-700 disabled:bg-teal-900"
             >
               Add to Cart
             </button>
           </div>
         </form>
       </div>
+      <!-- Product info -->
     </div>
+    <!-- Product general details -->
 
-    <!-- Product Details -->
+    <!-- Product description -->
     <div class="mt-8 grid grid-cols-1 gap-8 md:grid-cols-2">
       <div class="max-w-1xl prose">
         <p>
@@ -458,9 +376,9 @@
         </dl>
       </div>
     </div>
-    <!-- Product Details -->
-
+    <!-- Product description -->
   </div>
+  <!-- Product -->
 
   <div class="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
     <header>
@@ -471,13 +389,14 @@
       {{#each relatedProducts}}
         <li>
           <a
-            href="/products/laptops/{{id}}"
+            href="/products/{{@root.category}}/{{id}}"
             class="group block overflow-hidden"
           >
             <img
               src="{{image}}"
               alt=""
-              class="aspect-square object-cover transition duration-500 group-hover:scale-105 xsm:max-h-60"
+              onerror="this.onerror=null; this.src='/images/placeholder/product.webp';"
+              class="aspect-[3/2] object-cover transition duration-500 group-hover:scale-105 xsm:max-h-72"
             />
 
             <div class="relative bg-white pt-3">
@@ -841,14 +760,26 @@
         {{/if}}
       });
 
-    const toLocalDate = (time) => {
-      if (!time) {
-        return "";
-      }
+      const addItemToCart = async (quantity) => {
+        try {
+          const response = await fetch("/api/cart", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+              productId: {{product.id}},
+              quantity: quantity,
+            }),
+          });
 
-      const date = new Date(time);
-      return date.toISOString().split('T')[0];
-    }
-    
+          if (!response.ok) {
+            throw new Error();
+          }
+          toast("Product added to your cart", {type: "success"});
+        } catch (err) {
+          toast("Cannot add product to your cart. Please try again!", {type: "warning"});
+        }
+      }
   </script>
 {{/content}}
