@@ -14,16 +14,14 @@ passport.use(
       const account = {
         email: email,
       };
-      try {
-        const result = await usersServices.getUserInfoFromEmail(email, [
-          "id",
-          "password",
-        ]);
 
-        Object.assign(account, result);
-      } catch (err) {
-        return cb(null, false, { message: "Incorrect email." });
-      }
+      const result = await usersServices.getUserInfoFromEmail(email, [
+        "id",
+        "password",
+      ]);
+
+      if (!result) return cb(null, false, { message: "Incorrect email." });
+      Object.assign(account, result);
 
       bcrypt.compare(password, account.password, (err, result) => {
         if (err) {
