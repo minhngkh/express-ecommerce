@@ -13,3 +13,12 @@ exports.slugify = (str) => {
     .replace(/\s+/g, "-") // replace spaces with hyphens
     .replace(/-+/g, "-"); // remove consecutive hyphens
 };
+
+exports.trimUrl = (encodedUrl) => {
+  try {
+    const urlObj = new URL(decodeURIComponent(encodedUrl));
+    return urlObj.pathname + urlObj.search;
+  } catch (err) {
+    return null;
+  }
+};

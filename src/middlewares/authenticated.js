@@ -11,7 +11,6 @@ exports.require = (req, res, next) => {
 exports.redirect = (destination = null) => {
   return (req, res, next) => {
     if (res.locals.isAuthenticated) {
-      console.log("ok");
       return res.redirect(destination || req.query.next || "/");
     }
     next();

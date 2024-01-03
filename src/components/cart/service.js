@@ -1,4 +1,4 @@
-const { and, desc, eq, gt, sql } = require("drizzle-orm");
+const { and, desc, eq, sql } = require("drizzle-orm");
 
 const db = require("#db/client");
 const {

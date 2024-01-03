@@ -2,6 +2,7 @@ const { body } = require("express-validator");
 
 const cartService = require("#components/cart/service");
 const passport = require("#middlewares/passport");
+const { trimUrl } = require("#utils/formatter");
 const userService = require("./service");
 
 //TODO: Check validation errors
@@ -19,7 +20,7 @@ exports.signOut = (req, res, next) => {
     if (err) {
       return next(err);
     }
-    res.redirect(req.query.next || "/");
+    res.redirect(trimUrl(req.query.next) || "/");
   });
 };
 
@@ -37,11 +38,6 @@ exports.processOnSuccess = async (req, res, next) => {
   const userCartId = await cartService.getCartOfUser(userId);
   const { sessionCartId } = res.locals;
 
-  console.log(req.session);
-
-  console.log("User cart id:", userCartId);
-  console.log("Session cart id:", sessionCartId);
-
   try {
     if (userCartId) {
       if (sessionCartId) {
@@ -58,7 +54,7 @@ exports.processOnSuccess = async (req, res, next) => {
     return next(err);
   }
 
-  res.redirect(req.query.next || "/");
+  res.redirect(trimUrl(req.query.next) || "/");
 };
 
 exports.validateSignUpCredentials = [
