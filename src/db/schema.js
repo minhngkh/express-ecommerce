@@ -55,8 +55,6 @@ const productSubcategory = sqliteTable(
   },
 );
 
-// To remove a brand, it's needed to set the categoryIf field of all products of
-// that brand to null first
 const productBrand = sqliteTable("product_brand", {
   id: integer("id").primaryKey(),
   name: text("name").notNull(),
@@ -208,6 +206,7 @@ const cartItem = sqliteTable(
     cartId: integer("cart_id").references(() => cart.id),
     productId: integer("product_id").references(() => product.id),
     quantity: integer("quantity").notNull(),
+    updatedAt: text("updated_at").default(sql`current_timestamp`),
   },
   (table) => {
     return {

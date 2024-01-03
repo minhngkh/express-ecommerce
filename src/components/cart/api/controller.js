@@ -3,9 +3,16 @@ const cartService = require("../service");
 exports.addItemToCart = async (req, res, _) => {
   let { cartId } = req.session;
   if (!cartId) {
-    req.session.cartId = cartId = await cartService.createCart(
-      res.locals.isAuthenticated ? req.user.id : null,
-    );
+    if (res.locals.isAuthenticated) {
+      cartId = await cartService.getCartOfUser(req.user.id);
+      if (cartId === null) {
+        cartId = await cartService.createCart(req.user.id);
+      }
+    } else {
+      cartId = await cartService.createCart();
+    }
+
+    req.session.cartId = cartId;
   }
 
   const productId = Number(req.body.productId);

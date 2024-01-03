@@ -22,15 +22,17 @@ router.get("/signout", authController.signOut);
 router.post(
   "/signin",
   authController.validateSignInCredentials,
+  authController.retainSessionInfo,
   authController.authenticateSignInCredentials,
-  authController.redirectOnSuccess,
+  authController.processOnSuccess,
 );
 
 router.post(
   "/signup",
   authController.validateSignUpCredentials,
+  authController.retainSessionInfo,
   authController.authenticateSignUpCredentials,
-  authController.redirectOnSuccess,
+  authController.processOnSuccess,
 );
 
 module.exports = router;

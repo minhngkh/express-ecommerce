@@ -1,4 +1,4 @@
-const { and, eq, sql } = require("drizzle-orm");
+const { and, desc, eq, gt, sql } = require("drizzle-orm");
 
 const db = require("#db/client");
 const {
@@ -9,18 +9,22 @@ const {
   productCategory,
 } = require("#db/schema");
 
+const NewExpiration = sql`datetime('now', '+7 day')`;
+
 /**
  * Create a new cart
  * @param {number} userId
  * @returns Cart id
  */
 exports.createCart = (userId = null) => {
-  const query = db
-    .insert(cart)
-    .values(userId ? { userId: userId } : {})
-    .returning({
-      insertedId: cart.id,
-    });
+  const toInsertFields =
+    userId === null
+      ? { expiration: NewExpiration }
+      : { userId: userId, expiration: null };
+
+  const query = db.insert(cart).values(toInsertFields).returning({
+    insertedId: cart.id,
+  });
 
   return query.then((val) => val[0].insertedId);
 };
@@ -34,25 +38,20 @@ exports.createCart = (userId = null) => {
  * @returns
  */
 exports.addItemToCart = (cartId, productId, quantity) => {
-  return db.batch([
-    db
-      .insert(cartItem)
-      .values({
-        cartId: cartId,
-        productId: productId,
-        quantity: quantity,
-      })
-      .onConflictDoUpdate({
-        target: [cartItem.cartId, cartItem.productId],
-        set: {
-          quantity: sql`${cartItem.quantity} + ${quantity}`,
-        },
-      }),
-
-    db.update(cart).set({
-      expiration: sql,
-    }),
-  ]);
+  return db
+    .insert(cartItem)
+    .values({
+      cartId: cartId,
+      productId: productId,
+      quantity: quantity,
+      updatedAt: sql`current_timestamp`,
+    })
+    .onConflictDoUpdate({
+      target: [cartItem.cartId, cartItem.productId],
+      set: {
+        quantity: sql`${cartItem.quantity} + ${quantity}`,
+      },
+    });
 };
 
 /**
@@ -61,7 +60,7 @@ exports.addItemToCart = (cartId, productId, quantity) => {
  * @returns Items in the cart
  */
 exports.getCartItems = (cartId) => {
-  return db
+  const getItems = db
     .select({
       productId: cartItem.productId,
       category: productCategory.name,
@@ -81,7 +80,17 @@ exports.getCartItems = (cartId) => {
         eq(productImage.isPrimary, true),
       ),
     )
-    .where(eq(cartItem.cartId, cartId));
+    .where(eq(cartItem.cartId, cartId))
+    .orderBy(desc(cartItem.updatedAt));
+
+  const renewExpiration = db
+    .update(cart)
+    .set({
+      expiration: NewExpiration,
+    })
+    .where(eq(cart.id, cartId));
+
+  return db.batch([getItems, renewExpiration]).then((val) => val[0]);
 };
 
 /**
@@ -96,6 +105,7 @@ exports.updateItemInCart = (cartId, productId, quantity) => {
     .update(cartItem)
     .set({
       quantity: quantity,
+      updatedAt: sql`current_timestamp`,
     })
     .where(and(eq(cartItem.cartId, cartId), eq(cartItem.productId, productId)));
 };
@@ -126,4 +136,70 @@ exports.bindCartToUser = (cartId, userId) => {
       expiration: null,
     })
     .where(eq(cart.id, cartId));
+};
+
+/**
+ * Merge items from one cart to another
+ * @param {number} fromCartId
+ * @param {number} toCartId
+ * @returns
+ */
+exports.mergeCart = (fromCartId, toCartId) => {
+  // Getting cart items to merge in sub-query
+  const sq = db
+    .select({
+      productId: cartItem.productId,
+      quantity: cartItem.quantity,
+    })
+    .from(cartItem)
+    .where(eq(cartItem.cartId, fromCartId))
+    .as("sq");
+
+  const mergeQuery = db.run(sql`
+    INSERT INTO ${cartItem} (
+      ${name(cartItem.cartId)}, 
+      ${name(cartItem.productId)}, 
+      ${name(cartItem.quantity)})
+    SELECT ${toCartId}, ${sq.productId}, ${sq.quantity} FROM ${sq} WHERE true
+    ON CONFLICT (${cartItem.cartId}, ${cartItem.productId})
+    DO UPDATE SET
+      ${name(cartItem.quantity)} = 
+        ${name(cartItem.quantity)} + excluded.${name(cartItem.quantity)},
+      ${name(cartItem.updatedAt)} = current_timestamp
+  `);
+
+  const removeQuery = db
+    .update(cart)
+    .set({
+      expiration: sql`current_timestamp`,
+    })
+    .where(eq(cart.id, fromCartId));
+
+  return db.batch([mergeQuery, removeQuery]);
+};
+
+/**
+ * Get cart of the user
+ * @param {number} userId
+ * @returns Cart id
+ */
+exports.getCartOfUser = (userId) => {
+  const query = db
+    .select({
+      id: cart.id,
+    })
+    .from(cart)
+    .where(and(eq(cart.userId, userId)))
+    .orderBy(desc(cart.expiration))
+    .limit(1);
+
+  return query.then((val) => {
+    return val.length ? val[0].id : null;
+  });
+};
+
+// Helpers
+
+const name = (col) => {
+  return sql.raw(col.name);
 };
