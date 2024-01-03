@@ -1,5 +1,6 @@
-const reviewsService = require("../service");
 const { body, validationResult } = require("express-validator");
+
+const reviewsService = require("../service");
 
 exports.getAllReviews = async (req, res, _) => {
   const reviews = await reviewsService.getAllReviews(req.params.productId);

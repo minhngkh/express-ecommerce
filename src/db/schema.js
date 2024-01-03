@@ -63,6 +63,21 @@ const productBrand = sqliteTable("product_brand", {
   description: text("description"),
 });
 
+const brandInCategory = sqliteTable(
+  "brand_in_category",
+  {
+    categoryId: integer("category_id").references(() => productCategory.id),
+    brandId: integer("brand_id").references(() => productBrand.id, {
+      onDelete: "cascade",
+    }),
+  },
+  (table) => {
+    return {
+      pk: primaryKey({ columns: [table.categoryId, table.brandId] }),
+    };
+  },
+);
+
 const product = sqliteTable(
   "product",
   {
@@ -70,15 +85,20 @@ const product = sqliteTable(
     categoryId: integer("category_id").references(() => productCategory.id),
     name: text("name").notNull(),
     price: integer("price").notNull(),
-    brandId: integer("brand_id").references(() => productBrand.id, {
-      onDelete: "set null",
-    }),
+    brandId: integer("brand_id"),
     subcategoryId: integer("subcategory_id"),
     status: text("status").notNull(),
     createdAt: text("created_at").default(sql`current_timestamp`),
+    isDeleted: integer("is_deleted", { mode: "boolean" })
+      .notNull()
+      .default(false),
   },
   (table) => {
     return {
+      brandInCategoryRef: foreignKey({
+        columns: [table.categoryId, table.brandId],
+        foreignColumns: [brandInCategory.categoryId, brandInCategory.brandId],
+      }),
       subcategoryRef: foreignKey({
         columns: [table.subcategoryId, table.categoryId],
         foreignColumns: [productSubcategory.id, productSubcategory.categoryId],
@@ -179,7 +199,7 @@ const productReview = sqliteTable(
 const cart = sqliteTable("cart", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").references(() => user.id),
-  expiration: text("expiration").default(sql`current_timestamp`),
+  expiration: text("expiration"),
 });
 
 const cartItem = sqliteTable(
@@ -236,6 +256,7 @@ module.exports = {
   productCategory,
   productSubcategory,
   productBrand,
+  brandInCategory,
   product,
   laptopProduct,
   phoneProduct,

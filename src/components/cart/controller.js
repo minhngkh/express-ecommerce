@@ -1,5 +1,4 @@
 const cartService = require("./service");
-const { currencyFormatter } = require("#utils/formatter");
 
 /**
  * @enum {string}

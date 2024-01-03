@@ -1,4 +1,4 @@
-const { and, eq, sql, getTableColumns } = require("drizzle-orm");
+const { and, eq, sql } = require("drizzle-orm");
 
 const db = require("#db/client");
 const {
@@ -9,7 +9,12 @@ const {
   productCategory,
 } = require("#db/schema");
 
-exports.createCart = async (userId = null) => {
+/**
+ * Create a new cart
+ * @param {number} userId
+ * @returns Cart id
+ */
+exports.createCart = (userId = null) => {
   const query = db
     .insert(cart)
     .values(userId ? { userId: userId } : {})
@@ -20,26 +25,43 @@ exports.createCart = async (userId = null) => {
   return query.then((val) => val[0].insertedId);
 };
 
-exports.addItemToCart = async (cartId, productId, quantity) => {
-  const query = db
-    .insert(cartItem)
-    .values({
-      cartId: cartId,
-      productId: productId,
-      quantity: quantity,
-    })
-    .onConflictDoUpdate({
-      target: [cartItem.cartId, cartItem.productId],
-      set: {
-        quantity: sql`${cartItem.quantity} + ${quantity}`,
-      },
-    });
+/**
+ * Add a new item to the cart or increase the quantity if the item already
+ * exists
+ * @param {number} cartId
+ * @param {number} productId
+ * @param {number} quantity
+ * @returns
+ */
+exports.addItemToCart = (cartId, productId, quantity) => {
+  return db.batch([
+    db
+      .insert(cartItem)
+      .values({
+        cartId: cartId,
+        productId: productId,
+        quantity: quantity,
+      })
+      .onConflictDoUpdate({
+        target: [cartItem.cartId, cartItem.productId],
+        set: {
+          quantity: sql`${cartItem.quantity} + ${quantity}`,
+        },
+      }),
 
-  return query;
+    db.update(cart).set({
+      expiration: sql,
+    }),
+  ]);
 };
 
-exports.getCartItems = async (cartId) => {
-  const query = db
+/**
+ * Get items in the cart
+ * @param {number} cartId
+ * @returns Items in the cart
+ */
+exports.getCartItems = (cartId) => {
+  return db
     .select({
       productId: cartItem.productId,
       category: productCategory.name,
@@ -60,11 +82,16 @@ exports.getCartItems = async (cartId) => {
       ),
     )
     .where(eq(cartItem.cartId, cartId));
-
-  return query;
 };
 
-exports.updateItemInCart = async (cartId, productId, quantity) => {
+/**
+ * Update item quantity in the cart
+ * @param {number} cartId
+ * @param {number} productId
+ * @param {number} quantity
+ * @returns
+ */
+exports.updateItemInCart = (cartId, productId, quantity) => {
   return db
     .update(cartItem)
     .set({
@@ -73,8 +100,30 @@ exports.updateItemInCart = async (cartId, productId, quantity) => {
     .where(and(eq(cartItem.cartId, cartId), eq(cartItem.productId, productId)));
 };
 
-exports.removeItemFromCart = async (cartId, productId) => {
+/**
+ * Remove item from the cart
+ * @param {number} cartId
+ * @param {number} productId
+ * @returns
+ */
+exports.removeItemFromCart = (cartId, productId) => {
   return db
     .delete(cartItem)
     .where(and(eq(cartItem.cartId, cartId), eq(cartItem.productId, productId)));
+};
+
+/**
+ * Bind cart to user
+ * @param {number} cartId
+ * @param {number} userId
+ * @returns
+ */
+exports.bindCartToUser = (cartId, userId) => {
+  return db
+    .update(cart)
+    .set({
+      userId: userId,
+      expiration: null,
+    })
+    .where(eq(cart.id, cartId));
 };
