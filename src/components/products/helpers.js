@@ -6,6 +6,8 @@ const DefaultListLimit = 6;
  * @param {string} [searchQuery.subcategory]
  * @param {string} [searchQuery.brand]
  * @param {string} [searchQuery.name]
+ * @param {string} [searchQuery.minPrice]
+ * @param {string} [searchQuery.maxPrice]
  * @param {string} [searchQuery.limit]
  * @param {string} [searchQuery.page]
  * @param {string} [searchQuery.sort]

@@ -1,6 +1,8 @@
 const { body } = require("express-validator");
 
+const cartService = require("#components/cart/service");
 const passport = require("#middlewares/passport");
+const { trimUrl } = require("#utils/formatter");
 const userService = require("./service");
 
 //TODO: Check validation errors
@@ -18,7 +20,7 @@ exports.signOut = (req, res, next) => {
     if (err) {
       return next(err);
     }
-    res.redirect("/");
+    res.redirect(trimUrl(req.query.next) || "/");
   });
 };
 
@@ -28,9 +30,32 @@ exports.validateSignInCredentials = [
 ];
 
 exports.authenticateSignInCredentials = passport.authenticate("local", {
-  successRedirect: "/",
-  failureRedirect: "/auth/signin",
+  failureRedirect: "back",
 });
+
+exports.processOnSuccess = async (req, res, next) => {
+  const { id: userId } = req.user;
+  const userCartId = await cartService.getCartOfUser(userId);
+  const { sessionCartId } = res.locals;
+
+  try {
+    if (userCartId) {
+      if (sessionCartId) {
+        await cartService.mergeCart(sessionCartId, userCartId);
+        console.log("Cart merged");
+      }
+      req.session.cartId = userCartId;
+    } else if (sessionCartId) {
+      await cartService.bindCartToUser(sessionCartId, userId);
+      req.session.cartId = sessionCartId;
+      console.log("Cart bound");
+    }
+  } catch (err) {
+    return next(err);
+  }
+
+  res.redirect(trimUrl(req.query.next) || "/");
+};
 
 exports.validateSignUpCredentials = [
   body("name").notEmpty().withMessage("Full name is required"),
@@ -46,10 +71,10 @@ exports.validateSignUpCredentials = [
 ];
 
 exports.authenticateSignUpCredentials = async (req, res, next) => {
-  const password = await userService.getUserPasswordByEmail(req.body.email);
+  const userExists = await userService.existsUser(req.body.email);
 
   // Existing email
-  if (password === null) {
+  if (userExists) {
     return res.redirect("back");
   }
 
@@ -69,10 +94,15 @@ exports.authenticateSignUpCredentials = async (req, res, next) => {
         if (err) {
           return next(err);
         }
-        res.redirect("/");
+        next();
       },
     );
   } catch (err) {
     res.redirect("back");
   }
+};
+
+exports.retainSessionInfo = (req, res, next) => {
+  res.locals.sessionCartId = req.session.cartId;
+  next();
 };

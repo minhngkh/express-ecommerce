@@ -1,3 +1,5 @@
+const util = require("util");
+
 exports.comp = function (v1, operator, v2, options) {
   switch (operator) {
     case "==":
@@ -41,6 +43,10 @@ exports.parseJsonList = (data) => {
   const list = data.split("|");
 
   return list.map((e) => JSON.parse(e));
+};
+
+exports.toString = (obj) => {
+  return util.inspect(obj);
 };
 
 exports.toStringList = (list) => {

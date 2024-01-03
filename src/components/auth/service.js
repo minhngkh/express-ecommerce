@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-const { eq } = require("drizzle-orm");
+const { eq, sql } = require("drizzle-orm");
 
 const db = require("#db/client");
 const { user } = require("#db/schema");
@@ -20,6 +20,25 @@ exports.getUserPasswordByEmail = (email) => {
 
   return query.then((val) => {
     return val.length ? val[0].password : null;
+  });
+};
+
+/**
+ * Check if user account exists by email
+ * @param {string} email
+ * @returns
+ */
+exports.existsUser = (email) => {
+  const query = db
+    .select({
+      val: sql`1`,
+    })
+    .from(user)
+    .where(eq(user.email, email))
+    .limit(1);
+
+  return query.then((val) => {
+    return !!val.length;
   });
 };
 

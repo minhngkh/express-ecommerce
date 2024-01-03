@@ -8,10 +8,10 @@ exports.require = (req, res, next) => {
   next();
 };
 
-exports.redirect = (destination) => {
+exports.redirect = (destination = null) => {
   return (req, res, next) => {
     if (res.locals.isAuthenticated) {
-      return res.redirect(destination);
+      return res.redirect(destination || req.query.next || "/");
     }
     next();
   };

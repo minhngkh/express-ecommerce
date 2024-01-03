@@ -5,11 +5,15 @@ const authController = require("./controller");
 
 const router = express.Router();
 
-router.get("/signup", authController.renderSignUpForm);
+router.get(
+  "/signup",
+  authenticated.redirect(),
+  authController.renderSignUpForm,
+);
 
 router.get(
   "/signin",
-  authenticated.redirect("/"),
+  authenticated.redirect(),
   authController.renderSignInForm,
 );
 
@@ -18,13 +22,17 @@ router.get("/signout", authController.signOut);
 router.post(
   "/signin",
   authController.validateSignInCredentials,
+  authController.retainSessionInfo,
   authController.authenticateSignInCredentials,
+  authController.processOnSuccess,
 );
 
 router.post(
   "/signup",
   authController.validateSignUpCredentials,
+  authController.retainSessionInfo,
   authController.authenticateSignUpCredentials,
+  authController.processOnSuccess,
 );
 
 module.exports = router;

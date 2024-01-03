@@ -1,4 +1,4 @@
-const { sql } = require("drizzle-orm");
+const { eq, sql } = require("drizzle-orm");
 const {
   integer,
   foreignKey,
@@ -55,13 +55,26 @@ const productSubcategory = sqliteTable(
   },
 );
 
-// To remove a brand, it's needed to set the categoryIf field of all products of
-// that brand to null first
 const productBrand = sqliteTable("product_brand", {
   id: integer("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
 });
+
+const brandInCategory = sqliteTable(
+  "brand_in_category",
+  {
+    categoryId: integer("category_id").references(() => productCategory.id),
+    brandId: integer("brand_id").references(() => productBrand.id, {
+      onDelete: "cascade",
+    }),
+  },
+  (table) => {
+    return {
+      pk: primaryKey({ columns: [table.categoryId, table.brandId] }),
+    };
+  },
+);
 
 const product = sqliteTable(
   "product",
@@ -70,15 +83,20 @@ const product = sqliteTable(
     categoryId: integer("category_id").references(() => productCategory.id),
     name: text("name").notNull(),
     price: integer("price").notNull(),
-    brandId: integer("brand_id").references(() => productBrand.id, {
-      onDelete: "set null",
-    }),
+    brandId: integer("brand_id"),
     subcategoryId: integer("subcategory_id"),
     status: text("status").notNull(),
     createdAt: text("created_at").default(sql`current_timestamp`),
+    isDeleted: integer("is_deleted", { mode: "boolean" })
+      .notNull()
+      .default(false),
   },
   (table) => {
     return {
+      brandInCategoryRef: foreignKey({
+        columns: [table.categoryId, table.brandId],
+        foreignColumns: [brandInCategory.categoryId, brandInCategory.brandId],
+      }),
       subcategoryRef: foreignKey({
         columns: [table.subcategoryId, table.categoryId],
         foreignColumns: [productSubcategory.id, productSubcategory.categoryId],
@@ -150,7 +168,9 @@ const productImage = sqliteTable(
     return {
       productIdIsPrimaryUnique: uniqueIndex(
         "ux__product_image__product_id__is_primary",
-      ).on(table.productId, table.isPrimary),
+      )
+        .on(table.productId, table.isPrimary)
+        .where(eq(table.isPrimary, true)),
     };
   },
 );
@@ -177,7 +197,7 @@ const productReview = sqliteTable(
 const cart = sqliteTable("cart", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").references(() => user.id),
-  expiration: text("expiration").default(sql`current_timestamp`),
+  expiration: text("expiration"),
 });
 
 const cartItem = sqliteTable(
@@ -186,6 +206,7 @@ const cartItem = sqliteTable(
     cartId: integer("cart_id").references(() => cart.id),
     productId: integer("product_id").references(() => product.id),
     quantity: integer("quantity").notNull(),
+    updatedAt: text("updated_at").default(sql`current_timestamp`),
   },
   (table) => {
     return {
@@ -234,6 +255,7 @@ module.exports = {
   productCategory,
   productSubcategory,
   productBrand,
+  brandInCategory,
   product,
   laptopProduct,
   phoneProduct,

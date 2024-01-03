@@ -1,5 +1,6 @@
-const userService = require("./service");
 const createError = require("http-errors");
+
+const userService = require("./service");
 
 exports.renderProfile = async (req, res, next) => {
   const result = await userService.getUserInfo(req.user.id, ["fullName"]);

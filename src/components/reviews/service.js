@@ -1,7 +1,7 @@
-// #TODO: User jsconfig file to add a path alias to src directory
-const db = require("../../db/client");
-const { productReview, user } = require("../../db/schema");
 const { eq, sql, and, avg } = require("drizzle-orm");
+
+const db = require("#db/client");
+const { productReview, user } = require("#db/schema");
 
 const utcTimeField = sql`strftime('%Y-%m-%dT%H:%M:%fZ', ${productReview.createdAt})`;
 

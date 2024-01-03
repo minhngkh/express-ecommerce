@@ -40,7 +40,7 @@
         <!-- Desktop Filters & Sorting -->
         <form
           id="myForm"
-          action="/products/laptops/"
+          action="/products/{{category}}/"
           method="get"
           class="hidden space-y-4 lg:block"
           x-data="{ 
@@ -343,19 +343,20 @@
       {{#if products}}
         <div class="lg:col-span-3">
           <ul
-            class="grid gap-6 sm:grid-cols-2 sm:grid-rows-3 lg:grid-cols-3 lg:grid-rows-2"
+            :class="{ 'lg:grid-cols-3': '{{category}}' === 'laptops', 'lg:grid-cols-4': '{{category}}' === 'phones' }"
+            class="grid gap-6 sm:grid-cols-2"
           >
             {{#each products}}
               <li>
                 <a
-                  href="/products/{{{../category}}}/{{id}}"
+                  href="/products/{{@root.category}}/{{id}}"
                   class="group block overflow-hidden"
                 >
                   <img
                     src="{{image}}"
                     alt=""
                     onerror="this.onerror=null; this.src='/images/placeholder/product.webp';"
-                    class="aspect-square object-cover transition duration-500 group-hover:scale-105 xsm:max-h-72"
+                    class="aspect-[3/2] object-cover transition duration-500 group-hover:scale-105 xsm:max-h-72"
                   />
 
                   <div class="relative bg-white pt-3">

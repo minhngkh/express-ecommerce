@@ -1,0 +1,422 @@
+<body>
+  <div class="mx-auto max-w-screen-2xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <h1 class="mb-10 text-center text-2xl font-bold">Your cart</h1>
+    <div x-show="$store.cart.items.length">
+      <div
+        class="mx-auto max-w-5xl justify-center px-6 md:flex md:space-x-6 xl:px-0"
+      >
+        <div class="md:w-2/3">
+          <ul>
+            <template x-for="item in $store.cart.items" :key="item.productId">
+              <template x-if="item.status === 'On stock'">
+                <li>
+                  <div class="w-full rounded-lg">
+                    <div
+                      class="mb-6 justify-between rounded-lg border bg-white p-6 shadow-md sm:flex sm:justify-start"
+                    >
+                      <a
+                        class="grid place-items-center"
+                        :href="`/products/${CategoryPath[item.category]}/${item.productId}`"
+                      >
+                        <img
+                          :src="item.image"
+                          alt="product-image"
+                          onerror="this.onerror=null; this.src='/images/placeholder/product.webp';"
+                          class="aspect-[3/2] w-full rounded-lg object-cover sm:w-40"
+                        />
+                      </a>
+
+                      <div
+                        class="space-y-4 sm:ml-4 sm:flex sm:w-full sm:justify-between sm:space-y-0"
+                      >
+                        <div class="flex flex-col justify-between space-y-3">
+                          <div class="mt-5 sm:mt-0">
+                            <a
+                              :href="`/products/${CategoryPath[item.category]}/${item.productId}`"
+                            >
+                              <h2
+                                x-text="item.name"
+                                class="text-lg font-bold text-gray-900"
+                              ></h2>
+                            </a>
+
+                            <p
+                              x-text="currencyFormatter.format(item.price)"
+                              class="mt-1 text-xs text-gray-700"
+                            ></p>
+                          </div>
+
+                          <!-- Input Number -->
+                          <form>
+                            <div class="inline-block">
+                              <label
+                                for="quantity"
+                                class="sr-only"
+                              >Quantity</label>
+                              <div class="flex items-center gap-x-1.5">
+                                <button
+                                  @click="await $store.cart.decrease(item.productId);"
+                                  :disabled="item.quantity <= 1"
+                                  type="button"
+                                  class="inline-flex h-6 w-6 items-center justify-center gap-x-2 rounded-md border border-gray-200 bg-white text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-700 dark:bg-slate-900 dark:text-white dark:hover:bg-gray-800 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                                >
+                                  <svg
+                                    class="h-3.5 w-3.5 flex-shrink-0"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  ><path d="M5 12h14" />
+                                  </svg>
+                                </button>
+                                <input
+                                  x-model.number="item.quantity"
+                                  id="quantity"
+                                  class="w-6 border-0 bg-transparent p-0 text-center text-gray-800 focus:ring-0 dark:text-white"
+                                  type="text"
+                                />
+                                <button
+                                  @click="await $store.cart.increase(item.productId);"
+                                  type="button"
+                                  class="inline-flex h-6 w-6 items-center justify-center gap-x-2 rounded-md border border-gray-200 bg-white text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-700 dark:bg-slate-900 dark:text-white dark:hover:bg-gray-800 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                                >
+                                  <svg
+                                    class="h-3.5 w-3.5 flex-shrink-0"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  ><path d="M5 12h14" /><path d="M12 5v14" />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                          </form>
+                          <!-- End Input Number -->
+                        </div>
+
+                        <div
+                          class="flex items-end justify-between sm:mt-0 sm:flex-col"
+                        >
+                          <div class="sm:order-last">
+                            <div
+                              class="inline-block text-end font-medium sm:block"
+                            >Total:</div>
+                            <div
+                              x-text="currencyFormatter.format(item.price * item.quantity)"
+                              class="inline-block w-max sm:block"
+                            ></div>
+                          </div>
+
+                          <button
+                            @click="await $store.cart.remove(item.productId);"
+                            class="text-red-500 hover:text-red-600"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              </template>
+            </template>
+
+          </ul>
+
+          <h2
+            x-show="$store.cart.items.findIndex((item) => item.status !== 'On stock') !== -1"
+            class="mb-2 font-medium"
+          >Unavailable</h2>
+
+          <ul>
+            <template x-for="item in $store.cart.items" :key="item.productId">
+              <template x-if="item.status !== 'On stock'">
+                <li>
+                  <div class="w-full rounded-lg brightness-90">
+                    <div
+                      class="mb-6 justify-between rounded-lg border bg-white p-6 shadow-md sm:flex sm:justify-start"
+                    >
+                      <a
+                        class="grid place-items-center"
+                        :href="`/products/${CategoryPath[item.category]}/${item.productId}`"
+                      >
+                        <img
+                          :src="item.image"
+                          alt="product-image"
+                          onerror="this.onerror=null; this.src='/images/placeholder/product.webp';"
+                          class="aspect-[3/2] w-full rounded-lg object-cover sm:w-40"
+                        />
+                      </a>
+
+                      <div
+                        class="space-y-4 sm:ml-4 sm:flex sm:w-full sm:justify-between sm:space-y-0"
+                      >
+                        <div class="flex flex-col justify-between space-y-3">
+                          <div class="mt-5 sm:mt-0">
+                            <a
+                              :href="`/products/${CategoryPath[item.category]}/${item.productId}`"
+                            >
+                              <h2
+                                x-text="item.name"
+                                class="text-lg font-bold text-gray-600"
+                              ></h2>
+                            </a>
+
+                            <p
+                              x-text="currencyFormatter.format(item.price)"
+                              class="mt-1 text-xs text-gray-400"
+                            ></p>
+                          </div>
+
+                          <!-- Input Number -->
+                          <form>
+                            <div class="inline-block">
+                              <label
+                                for="quantity"
+                                class="sr-only"
+                              >Quantity</label>
+                              <div class="flex items-center gap-x-1.5">
+                                <button
+                                  disabled
+                                  type="button"
+                                  class="inline-flex h-6 w-6 items-center justify-center gap-x-2 rounded-md border border-gray-200 bg-white text-sm font-medium text-gray-500 shadow-sm hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-700 dark:bg-slate-900 dark:text-white dark:hover:bg-gray-800 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                                >
+                                  <svg
+                                    class="h-3.5 w-3.5 flex-shrink-0"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  ><path d="M5 12h14" />
+                                  </svg>
+                                </button>
+                                <input
+                                  readonly
+                                  x-model.number="item.quantity"
+                                  id="quantity"
+                                  class="w-6 border-0 bg-transparent p-0 text-center text-gray-500 focus:ring-0 dark:text-white"
+                                  type="text"
+                                />
+                                <button
+                                  disabled
+                                  type="button"
+                                  class="inline-flex h-6 w-6 items-center justify-center gap-x-2 rounded-md border border-gray-200 bg-white text-sm font-medium text-gray-500 shadow-sm hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-700 dark:bg-slate-900 dark:text-white dark:hover:bg-gray-800 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                                >
+                                  <svg
+                                    class="h-3.5 w-3.5 flex-shrink-0"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  ><path d="M5 12h14" /><path d="M12 5v14" />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                          </form>
+                          <!-- End Input Number -->
+                        </div>
+
+                        <div
+                          class="flex items-end justify-between sm:mt-0 sm:flex-col"
+                        >
+                          <div class="text-gray-600 sm:order-last">
+                            <div
+                              class="inline-block text-end font-medium sm:block"
+                            >Total:</div>
+                            <div
+                              x-text="currencyFormatter.format(item.price * item.quantity)"
+                              class="inline-block w-max sm:block"
+                            ></div>
+                          </div>
+
+                          <button
+                            @click="await $store.cart.remove(item.productId);"
+                            class="text-red-500 brightness-110 hover:text-red-600"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              </template>
+            </template>
+
+          </ul>
+        </div>
+        <!-- Sub total -->
+        <div
+          x-data="{subtotal: $store.cart.subtotal()}"
+          x-init="$watch('$store.cart.subtotal()', value => subtotal = value)"
+          class="mt-6 h-full rounded-lg border bg-white p-6 shadow-md md:mt-0 md:w-1/3"
+        >
+          <div class="mb-2 flex justify-between">
+            <p class="font-medium text-gray-700">Subtotal</p>
+            <p
+              x-text="currencyFormatter.format(subtotal)"
+              class="text-gray-700"
+            ></p>
+          </div>
+          <div class="flex justify-between">
+            <p class="font-medium text-gray-700">Shipping</p>
+            <p class="text-gray-700">Free</p>
+          </div>
+          <hr class="my-4" />
+          <div class="flex justify-between">
+            <p class="text-lg font-bold">Total</p>
+            <div class="">
+              <p
+                x-text="currencyFormatter.format(subtotal)"
+                class="mb-1 text-lg font-bold"
+              ></p>
+              <p class="text-sm text-gray-700">including VAT</p>
+            </div>
+          </div>
+          <button
+            :disabled="subtotal == 0"
+            type="button"
+            class="mt-6 w-full rounded-md bg-teal-600 py-1.5 font-medium text-blue-50 hover:bg-teal-700 disabled:pointer-events-none"
+          >Check out</button>
+        </div>
+      </div>
+
+    </div>
+    <div x-show="!$store.cart.items.length">
+      <div class="flex flex-col items-center justify-center space-y-4 p-32">
+        <p class="text-center text-gray-700">There is nothing in your cart</p>
+
+        <a
+          class="block rounded-md bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-teal-700 dark:hover:bg-teal-500"
+          href="/"
+        >
+          Continue shopping
+        </a>
+      </div>
+
+    </div>
+  </div>
+</body>
+
+{{! prettier-ignore}}
+{{#content "script"}}
+  <script>
+    document.addEventListener('alpine:init', () => {
+      Alpine.store('cart', {
+        init() {
+          this.items.forEach((item) => {
+            item.old_quantity = item.quantity;
+          });
+
+          this.updateQuantity = debounce(async (productId, quantity) => {
+            try {
+              const response = await fetch(`/api/cart`, {
+                method: "PATCH",
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({
+                  productId: productId,
+                  quantity: quantity,
+                }),
+              });
+
+              if (!response.ok) throw new Error();
+
+              this.items.find((item) => item.productId == productId).old_quantity = quantity;
+            } catch (error) {
+              let item = this.items.find((e) => e.productId == productId)
+              console.log(productId)
+              item.quantity = item.old_quantity;
+
+              toast("Cannot update product quantity. Please try again later!", {
+                type: "danger",
+              });
+            }
+          });
+        },
+        
+        id: {{cartId}},
+        items: {{{toString cartItems}}},
+
+        updateQuantity: undefined,
+
+        async increase(productId) {
+          let item = this.items.find((item) => item.productId == productId);
+          item.quantity += 1;
+
+          await this.updateQuantity(productId, item.quantity);
+
+        },
+        async decrease(productId) {
+          let item = this.items.find((item) => item.productId == productId);
+          item.quantity -= 1;
+          
+          await this.updateQuantity(productId, item.quantity);
+        },
+        async remove(productId) {
+          try {
+            const response = await fetch(`/api/cart`, {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: new URLSearchParams({
+                productId: productId,
+              }),
+            });
+            
+            if (!response.ok) throw new Error();
+
+            const indexToRemove = this.items.findIndex(
+              (item) => item.productId == productId,
+            );
+            if (indexToRemove !== -1) {
+              this.items.splice(indexToRemove, 1);
+            }
+          } catch (err) {
+            toast("Cannot remove the product from your cart. Please try again later!", {
+              type: "danger",
+            });
+          }
+        },
+
+        subtotal() {
+          return this.items.reduce((acc, item) => {
+            if (item.status !== "On stock") return acc;
+            return acc + item.price * item.quantity;
+          }, 0);
+        },
+      });
+    });
+
+    const CategoryPath = {{{toString CategoryPath}}};
+
+    const currencyFormatter = new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    });
+  </script>
+{{/content}}
