@@ -32,7 +32,20 @@ router.post(
   authController.validateSignUpCredentials,
   authController.retainSessionInfo,
   authController.authenticateSignUpCredentials,
+  authController.verifyEmail,
   authController.processOnSuccess,
 );
+
+router.get("/verify/:id/:token", authController.tokenVerification);
+
+router.get("/forgot-password", authController.renderForgotPasswordForm);
+
+router.post(
+  "/forgot-password",
+  // authController.validateForgotPasswordCredentials,
+  authController.sendResetPasswordEmail,
+);
+
+router.get("/forgot-password/:token/:email/:password", authController.verifyPasswordResetToken);
 
 module.exports = router;

@@ -106,3 +106,75 @@ exports.retainSessionInfo = (req, res, next) => {
   res.locals.sessionCartId = req.session.cartId;
   next();
 };
+
+const sendEmail = require("../../lib/nodemailer.lib");
+const crypto = require("crypto");
+const { hash } = require("bcrypt");
+const { redirect } = require("#middlewares/authenticated");
+exports.verifyEmail = async (req, res, next) => {
+  const token = crypto.randomBytes(64).toString("hex");
+  const email = req.body.email;
+  const name = req.body.name;
+  const id = 13;  // TODO: get id from where?
+
+  try {
+    await sendEmail(email, "Verify email", "verifyEmail", { id, name, token });
+  } catch (err) {
+    next(err);
+  }
+
+  next();
+};
+
+exports.tokenVerification = (req, res, next) => {
+  const { id, token } = req.params;
+  userService.updateToken(id, token).then((val) => {
+    if (val) {
+      res.send("Token verified");
+    } else {
+      res.send("Invalid token");
+    }
+  });  
+};
+
+exports.renderForgotPasswordForm = (req, res, _) => {
+  res.render("resetPassword", { title: "Forgot password" });
+};
+
+exports.validateSignUpCredentials = [
+  body("email").isEmail().withMessage("Invalid email address"),
+  body("password")
+    .isLength({ min: 7, max: 100 })
+    .withMessage("Password must be between 7 and 100 characters"),
+  body("confirm-password")
+    .custom((value, { req }) => {
+      if (value !== req.body.password) {
+        // Handle error page
+      }
+      return true;
+    }),
+];
+
+exports.sendResetPasswordEmail = async (req, res, next) => {
+  const token = crypto.randomBytes(64).toString("hex");
+  const email = req.body.email;
+  const password = req.body.password;
+  
+  try {
+    await sendEmail(email, "Reset password", "resetPasswordEmail", { token, password, email });
+  } catch (err) {
+    next(err);
+  }
+  redirect("back");
+};
+
+exports.verifyPasswordResetToken = (req, res, next) => {
+  const { email, password, token } = req.params;
+  userService.changePassword(email, password).then((val) => {
+    if (val) {
+      res.send("Password changed");
+    } else {
+      res.send("Database error");
+    }
+  });
+};

@@ -66,3 +66,61 @@ exports.createUser = (userData) => {
     });
   });
 };
+
+/**
+ * Update token of user account
+ * @param {Number} userId
+ * @param {String} token
+ * @returns
+ */
+exports.updateToken = async (userId, token) => {
+  const query = db
+    .update(user)
+    .set({
+      token: token,
+      isVerified: true,
+    })
+    .where(eq(user.id, userId));
+
+  return query.then((val) => {
+    return val;
+  });
+};
+
+/**
+ * Get token of user account by email
+ * @param {String} email
+ * @returns
+ */
+exports.getTokenByEmail = (email) => {
+  const query = db
+    .select({ token: user.token })
+    .from(user)
+    .where(eq(user.email, email))
+    .limit(1);
+
+  return query.then((val) => {
+    return val.length ? val[0].token : null;
+  });
+};
+
+/**
+ * Change password of user account with email
+ * @param {String} email
+ * @param {String} newPassword
+ * @returns
+ */
+exports.changePassword = (email, newPassword) => {
+  return bcrypt.hash(newPassword, SaltRounds).then((hash) => {
+    const query = db
+      .update(user)
+      .set({
+        password: hash,
+      })
+      .where(eq(user.email, email));
+
+    return query.then((val) => {
+      return val;
+    });
+  });
+}

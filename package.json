@@ -31,6 +31,8 @@
     "hbs": "^4.2.0",
     "http-errors": "^2.0.0",
     "morgan": "^1.10.0",
+    "nodemailer": "^6.9.8",
+    "nodemailer-express-handlebars": "^6.1.0",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "redis": "^4.6.11",
