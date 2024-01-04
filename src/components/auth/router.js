@@ -30,22 +30,30 @@ router.post(
 router.post(
   "/signup",
   authController.validateSignUpCredentials,
-  authController.retainSessionInfo,
+  // authController.retainSessionInfo,
   authController.authenticateSignUpCredentials,
-  authController.verifyEmail,
+  authController.sendVerificationEmail,
+);
+
+router.get(
+  "/verify/:id/:token",
+  authController.retainSessionInfo,
+  authController.verifyToken,
   authController.processOnSuccess,
+  authController.renderVerificationMessage,
 );
 
-router.get("/verify/:id/:token", authController.tokenVerification);
+// router.get("/forgot-password", authController.renderForgotPasswordForm);
 
-router.get("/forgot-password", authController.renderForgotPasswordForm);
+// router.post(
+//   "/forgot-password",
+//   // authController.validateForgotPasswordCredentials,
+//   authController.sendResetPasswordEmail,
+// );
 
-router.post(
-  "/forgot-password",
-  // authController.validateForgotPasswordCredentials,
-  authController.sendResetPasswordEmail,
-);
-
-router.get("/forgot-password/:token/:email/:password", authController.verifyPasswordResetToken);
+// router.get(
+//   "/forgot-password/:token/:email/:password",
+//   authController.verifyPasswordResetToken,
+// );
 
 module.exports = router;

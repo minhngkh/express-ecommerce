@@ -10,6 +10,7 @@ const passport = require("#middlewares/passport");
 const session = require("#middlewares/session");
 const hbsHelpers = require("#utils/hbsHelpers");
 
+const apiAuthRouter = require("#components/auth/api/router");
 const apiCartRouter = require("#components/cart/api/router");
 const apiProductRouter = require("#components/products/api/router");
 
@@ -51,6 +52,7 @@ app.use((req, res, next) => {
 });
 
 // Setup routes
+app.use("/api/auth", apiAuthRouter);
 app.use("/api/products", apiProductRouter);
 app.use("/api/cart", apiCartRouter);
 

@@ -9,6 +9,9 @@
       "#db/*": [
         "src/db/*"
       ],
+      "#lib/*": [
+        "src/lib/*"
+      ],
       "#middlewares/*": [
         "src/middlewares/*"
       ],
