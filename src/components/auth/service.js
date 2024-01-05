@@ -183,3 +183,28 @@ exports.changePassword = async (email, newPassword) => {
     });
   });
 };
+
+/**
+ * Get user account by email
+ * @param {String} email
+ * @returns
+ */
+exports.getUserByEmail = async (email) => {
+  const query = db
+    .select({
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      password: user.password,
+      isVerified: user.isVerified,
+      token: user.token,
+      tokenExpiration: utcTimeField(user.tokenExpiration),
+    })
+    .from(user)
+    .where(eq(user.email, email))
+    .limit(1);
+
+  return query.then((val) => {
+    return val.length ? val[0] : null;
+  });
+};

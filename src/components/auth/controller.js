@@ -225,32 +225,52 @@ exports.renderForgotPasswordForm = (req, res, _) => {
   res.render("sendResetPassword", { title: "Forgot password" });
 }
 
-exports.sendResetPasswordEmail = async (req, res, next) => {
-  const email = req.body.email;
-  const token = await authService.getTokenByEmail(email);
-  
-  try {
-    await emailSender.send(email, "Reset password", "resetPasswordEmail", { token });
-  } catch (err) {
-    next(err);
+exports.sendResetPasswordEmail = async (req, res, _) => {
+  const { email } = req.body;
+  const user = await authService.getUserByEmail(email);
+
+  if (user) {
+    const token = crypto.randomBytes(64).toString("hex");
+    await authService.updateStatus(user.id, { token });
+
+    let baseUrl;
+    if (process.env.NODE_ENV === "production") {
+      baseUrl = `${req.protocol}://${req.hostname}`;
+    } else {
+      baseUrl = `http://localhost:${process.env.PORT || 3000}`;
+    }
+
+    await emailSender.send(email, "Reset password", "resetPasswordEmail", {
+      baseUrl: baseUrl,
+      token: token,
+    });
+
+    res.send(`A reset password link has been sent to ${email}`);
+  } else {
+    res.send(`Email ${email} does not exist`);
   }
-  res.redirect("/auth/signin");
 };
 
-exports.verifyPasswordResetToken = (req, res, next) => {
+exports.verifyPasswordResetToken = (req, res, _) => {
   const { token } = req.params;
-  res.render("resetPassword", { token });
-};
+  const email = authService.getEmailByToken(token);
 
-exports.resetPassword = async (req, res, next) => {
+  if (email) {
+    res.render("resetPassword", { title: "Reset password", token });
+  } else {
+    res.send("Invalid token");
+  }
+}
+
+exports.resetPassword = async (req, res, _) => {
   const { token } = req.params;
   const { password } = req.body;
   const email = await authService.getEmailByToken(token);
 
   if (email) {
-    authService.changePassword(email, password);
-    res.send("Password changed");
+    await authService.changePassword(email, password);
+    res.json({ msg: "Password changed", email, password });
   } else {
     res.send("Invalid token");
   }
-};
+}
