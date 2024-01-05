@@ -11,6 +11,7 @@ const fieldsDict = {
   password: user.password,
   avatar: user.avatar,
   createdAt: user.createdAt,
+  isVerified: user.isVerified,
 };
 
 /**

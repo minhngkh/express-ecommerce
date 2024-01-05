@@ -52,6 +52,7 @@
   "imports": {
     "#components/*": "./src/components/*.js",
     "#db/*": "./src/db/*.js",
+    "#lib/*": "./src/lib/*.js",
     "#middlewares/*": "./src/middlewares/*.js",
     "#utils/*": "./src/utils/*.js"
   }
