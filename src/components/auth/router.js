@@ -46,6 +46,7 @@ router.post(
   authController.sendResetPasswordEmail,
 );
 
-router.get("/forgot-password/:token/:email/:password", authController.verifyPasswordResetToken);
+router.get("/forgot-password/verify/:token/", authController.verifyPasswordResetToken);
+router.post("/forgot-password/reset-password/:token/", authController.resetPassword);
 
 module.exports = router;

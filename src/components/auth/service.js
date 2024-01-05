@@ -92,7 +92,7 @@ exports.updateToken = async (userId, token) => {
  * @param {String} email
  * @returns
  */
-exports.getTokenByEmail = (email) => {
+exports.getTokenByEmail = async (email) => {
   const query = db
     .select({ token: user.token })
     .from(user)
@@ -105,12 +105,29 @@ exports.getTokenByEmail = (email) => {
 };
 
 /**
+ * Get email by token
+ * @param {String} token
+ * @returns
+ */
+exports.getEmailByToken = async (token) => {
+  const query = db
+    .select({ email: user.email })
+    .from(user)
+    .where(eq(user.token, token))
+    .limit(1);
+
+  return query.then((val) => {
+    return val.length ? val[0].email : null;
+  });
+}
+
+/**
  * Change password of user account with email
  * @param {String} email
  * @param {String} newPassword
  * @returns
  */
-exports.changePassword = (email, newPassword) => {
+exports.changePassword = async (email, newPassword) => {
   return bcrypt.hash(newPassword, SaltRounds).then((hash) => {
     const query = db
       .update(user)

@@ -44,7 +44,7 @@ router.post("/reset-password", (req, res) => {
 });
 
 router.get("/reset-password", (req, res) => {
-  res.render("resetPassword");
+  res.render("sendResetPassword");
 });
 
 module.exports = router;
