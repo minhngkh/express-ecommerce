@@ -38,6 +38,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "../public")));
 
+app.use(express.static(path.join(__dirname, "./views/reports")));
+
+
 app.use(logger("dev"));
 
 // TODO: Implement CSRF protection
@@ -71,8 +74,12 @@ app.use("/", homeRouter);
 app.use("/auth", authRouter);
 app.use("/cart", cartRouter);
 app.use("/products", productsRouter);
-app.use("/test", testRouter);
 app.use("/user", userRouter);
+
+// Testing
+app.use("/test", testRouter);
+const reportRouter = require("#components/reports/router");
+app.use("/report", reportRouter);
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
