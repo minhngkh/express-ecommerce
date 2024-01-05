@@ -220,32 +220,35 @@ exports.renderVerificationMessage = (req, res, _) => {
   });
 };
 
+// Reset password here
+exports.renderForgotPasswordForm = (req, res, _) => {
+  res.render("sendResetPassword", { title: "Forgot password" });
+}
+
 exports.sendResetPasswordEmail = async (req, res, next) => {
   const email = req.body.email;
-  const token = await userService.getTokenByEmail(email);
+  const token = await authService.getTokenByEmail(email);
   
   try {
-    await sendEmail(email, "Reset password", "resetPasswordEmail", { token });
+    await emailSender.send(email, "Reset password", "resetPasswordEmail", { token });
   } catch (err) {
     next(err);
   }
-  redirect("/auth/signin");
+  res.redirect("/auth/signin");
 };
 
 exports.verifyPasswordResetToken = (req, res, next) => {
   const { token } = req.params;
-  // res.send(token);
   res.render("resetPassword", { token });
 };
 
 exports.resetPassword = async (req, res, next) => {
   const { token } = req.params;
   const { password } = req.body;
-  const email = await userService.getEmailByToken(token);
-  // res.send(email + " " + password);
+  const email = await authService.getEmailByToken(token);
 
   if (email) {
-    userService.changePassword(email, password);
+    authService.changePassword(email, password);
     res.send("Password changed");
   } else {
     res.send("Invalid token");

@@ -43,14 +43,8 @@ router.get(
   authController.renderVerificationMessage,
 );
 
-// router.get("/forgot-password", authController.renderForgotPasswordForm);
-
-// router.post(
-//   "/forgot-password",
-//   // authController.validateForgotPasswordCredentials,
-//   authController.sendResetPasswordEmail,
-// );
-
+// Reset password here
+router.get("/forgot-password", authController.renderForgotPasswordForm);
 router.post(
   "/forgot-password",
   // authController.validateForgotPasswordCredentials,
