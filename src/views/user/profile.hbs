@@ -1,55 +1,550 @@
-<main class="grid min-h-[calc(100vh-4rem)] justify-items-center align-top">
-  <div class="mx-auto w-full max-w-sm p-6">
-    <div class="mt-10 grid place-content-center">
+<main>
+  <div class="flex justify-center">
+    <div>
       <div
-        class="h-[3.875rem] w-[3.875rem] overflow-hidden rounded-full bg-gray-200"
+        class="grid max-w-screen-xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3"
       >
-        <svg
-          class="h-full w-full text-gray-300"
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
+
+        <div id="personal-information">
+          <h2 class="text-base font-semibold leading-7 text-gray-900">
+            Personal Information
+          </h2>
+          <p class="tex-gray-700 mt-1 text-sm leading-6">
+            Update your avatar and personal information.
+          </p>
+        </div>
+        <form
+          x-data="{ loading: false }"
+          @submit.prevent="loading = true; await $store.user.updateInfo(); loading = false;"
+          class="col-span-2"
         >
-          <rect
-            x="0.62854"
-            y="0.359985"
-            width="15"
-            height="15"
-            rx="7.5"
-            fill="white"
-          />
-          <path
-            d="M8.12421 7.20374C9.21151 7.20374 10.093 6.32229 10.093 5.23499C10.093 4.14767 9.21151 3.26624 8.12421 3.26624C7.0369 3.26624 6.15546 4.14767 6.15546 5.23499C6.15546 6.32229 7.0369 7.20374 8.12421 7.20374Z"
-            fill="currentColor"
-          />
-          <path
-            d="M11.818 10.5975C10.2992 12.6412 7.42106 13.0631 5.37731 11.5537C5.01171 11.2818 4.69296 10.9631 4.42107 10.5975C4.28982 10.4006 4.27107 10.1475 4.37419 9.94123L4.51482 9.65059C4.84296 8.95684 5.53671 8.51624 6.30546 8.51624H9.95231C10.7023 8.51624 11.3867 8.94749 11.7242 9.62249L11.8742 9.93184C11.968 10.1475 11.9586 10.4006 11.818 10.5975Z"
-            fill="currentColor"
-          />
-        </svg>
+          <div
+            class="grid grid-cols-1 gap-x-6 gap-y-6 sm:max-w-xl sm:grid-cols-6"
+          >
+            <div class="col-span-full flex items-center gap-x-8">
+              <img
+                :src="$store.user.avatar"
+                onerror="this.onerror=null; this.src='/images/placeholder/product.webp';"
+                alt="avatar"
+                class="h-24 w-24 flex-none rounded-lg object-cover"
+              />
+              <div>
+                <form>
+                  <label for="avatar-upload" class="sr-only">Choose file</label>
+                  <input
+                    :disabled="loading"
+                    @change="$store.upload.check();"
+                    type="file"
+                    name="avatar-upload"
+                    id="avatar-upload"
+                    accept="image/png, image/jpeg, image/webp"
+                    class="block w-fit rounded-lg border border-black/10 text-sm file:me-4 file:border-0 file:bg-black/5 file:px-4 file:py-2 focus:z-10 focus:border-teal-500 focus:ring-teal-500 disabled:pointer-events-none disabled:opacity-50"
+                  />
+                </form>
+
+                <p class="mt-2 text-sm text-gray-700">JPG, PNG or WEBP</p>
+
+              </div>
+            </div>
+
+            <div class="col-span-full">
+              <label
+                for="email"
+                class="block text-sm font-medium leading-6 text-gray-900"
+              >Email address
+              </label>
+              <div class="mt-2">
+                <input
+                  :disabled="loading"
+                  disabled
+                  x-model="$store.user.email"
+                  id="email"
+                  type="email"
+                  autocomplete="off"
+                  class="block w-full rounded-md border-0 bg-black/5 py-1.5 text-gray-900 ring-1 ring-inset ring-black/10 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+
+            <div class="col-span-full">
+              <label
+                for="userFullName"
+                class="block text-sm font-medium leading-6 text-gray-900"
+              >Full name
+              </label>
+              <div class="mt-2">
+                <input
+                  :disabled="loading"
+                  required
+                  id="userFullName"
+                  name="fullName"
+                  x-model="$store.user.fullName"
+                  type="text"
+                  autocomplete="off"
+                  class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-black/10 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+
+            <div class="mt-2">
+              <button
+                type="submit"
+                class="grid h-9 w-16 place-content-center rounded-md bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-teal-700 dark:hover:bg-teal-500"
+                x-html="loading ? 
+                `<div class='animate-spin h-4 w-4 border-[3px] border-current border-t-transparent text-white rounded-full dark:text-white' role='status' aria-label='loading'>
+                  <span class='sr-only'>Loading...</span>
+                </div>` : 'Save'"
+              >
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
-    </div>
 
-    <div
-      class="mt-5 flow-root rounded-lg border border-gray-100 py-3 shadow-sm dark:border-gray-700"
-    >
-      <dl class="-my-3 divide-y divide-gray-100 text-sm dark:divide-gray-700">
-        <div class="grid grid-cols-1 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
-          <dt class="font-medium text-gray-900 dark:text-white">Full name</dt>
-          <dd
-            class="text-right text-gray-700 dark:text-gray-200 sm:col-span-2"
-          >{{user.fullName}}</dd>
+      <div
+        class="grid max-w-screen-xl grid-cols-1 gap-x-8 gap-y-10 border-t border-t-gray-200 px-4 py-16 sm:px-6 md:grid-cols-3"
+      >
+        <div>
+          <h2 class="text-base font-semibold leading-7 text-gray-900">
+            Change password
+          </h2>
+          <p class="tex-gray-700 mt-1 text-sm leading-6">
+            Update your password associated with your account.
+          </p>
         </div>
+        <form
+          x-data="{ loading: false }"
+          @submit.prevent="loading = true; await $store.user.updatePassword(); loading = false;"
+          id="password-form"
+          class="col-span-2"
+        >
+          <div
+            class="grid grid-cols-1 gap-x-6 gap-y-6 sm:max-w-xl sm:grid-cols-6"
+          >
 
-        <div class="grid grid-cols-1 gap-1 p-3 sm:grid-cols-3 sm:gap-4">
-          <dt class="font-medium text-gray-900 dark:text-white">Email</dt>
-          <dd
-            class="text-right text-gray-700 dark:text-gray-200 sm:col-span-2"
-          >{{user.email}}</dd>
+            <div class="col-span-full">
+              <label
+                for="current-password"
+                class="block text-sm font-medium leading-6 text-gray-900"
+              >Current password
+              </label>
+              <div class="mt-2">
+                <input
+                  :disabled="loading"
+                  required
+                  x-model="$store.user.password.current"
+                  id="current-password"
+                  type="password"
+                  name="currentPassword"
+                  autocomplete="current-password"
+                  class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-black/10 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+
+            <div class="col-span-full">
+              <label
+                for="new-password"
+                class="block text-sm font-medium leading-6 text-gray-900"
+              >New password
+              </label>
+              <div class="mt-2">
+                <input
+                  :disabled="loading"
+                  required
+                  x-model="$store.user.password.new"
+                  id="new-password"
+                  type="password"
+                  name="newPassword"
+                  autocomplete="new-password"
+                  class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-black/10 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+
+            <div class="col-span-full">
+              <label
+                for="confirm-password"
+                class="block text-sm font-medium leading-6 text-gray-900"
+              >Confirm password
+              </label>
+              <div class="mt-2">
+                <input
+                  :disabled="loading"
+                  required
+                  x-model="$store.user.password.confirm"
+                  id="confirm-password"
+                  type="password"
+                  autocomplete="new-password"
+                  class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-black/10 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+
+            <div class="mt-2">
+              <button
+                type="submit"
+                class="grid h-9 w-16 place-content-center rounded-md bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-teal-700 dark:hover:bg-teal-500"
+                x-html="loading ? 
+                `<div class='animate-spin h-4 w-4 border-[3px] border-current border-t-transparent text-white rounded-full dark:text-white' role='status' aria-label='loading'>
+                  <span class='sr-only'>Loading...</span>
+                </div>` : 'Save'"
+              >
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div
+        class="grid max-w-screen-xl grid-cols-1 gap-x-8 gap-y-10 border-t border-t-gray-200 px-4 py-16 sm:px-6 md:grid-cols-3"
+      >
+        <div>
+          <h2 class="text-base font-semibold leading-7 text-gray-900">
+            Address
+          </h2>
+          <p class="tex-gray-700 mt-1 text-sm leading-6">
+            Update your shipping address.
+          </p>
         </div>
-      </dl>
+        <form
+          x-data="{ loading: false }"
+          @submit.prevent="loading = true; await $store.user.updateAddress(); loading = false;"
+          id="address-form"
+          class="col-span-2"
+        >
+          <div
+            class="grid grid-cols-1 gap-x-6 gap-y-6 sm:max-w-xl sm:grid-cols-6"
+          >
+
+            <div class="col-span-4">
+              <label
+                for="fullName"
+                class="block text-sm font-medium leading-6 text-gray-900"
+              >Full name
+              </label>
+              <div class="mt-2">
+                <input
+                  :disabled="loading"
+                  required
+                  id="fullName"
+                  x-model="$store.user.address.fullName"
+                  type="text"
+                  name="fullName"
+                  autocomplete="name"
+                  class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-black/10 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+
+            <div class="col-span-2">
+              <label
+                for="phoneNumber"
+                class="block text-sm font-medium leading-6 text-gray-900"
+              >Phone number
+              </label>
+              <div class="mt-2">
+                <input
+                  :disabled="loading"
+                  required
+                  x-model="$store.user.address.phoneNumber"
+                  id="phoneNumber"
+                  type="tel"
+                  name="phoneNumber"
+                  autocomplete="tel-national"
+                  class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-black/10 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+
+            <div class="col-span-full">
+              <label
+                for="addressLine1"
+                class="block text-sm font-medium leading-6 text-gray-900"
+              >Address Line 1
+              </label>
+              <div class="mt-2">
+                <input
+                  :disabled="loading"
+                  required
+                  id="addressLine1"
+                  x-model="$store.user.address.addressLine1"
+                  type="text"
+                  name="addressLine1"
+                  autocomplete="shipping address-line1"
+                  class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-black/10 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+
+            <div class="col-span-full">
+              <label
+                for="addressLine2"
+                class="block text-sm font-medium leading-6 text-gray-900"
+              >Address Line 2
+              </label>
+              <div class="mt-2">
+                <input
+                  :disabled="loading"
+                  id="addressLine2"
+                  x-model="$store.user.address.addressLine2"
+                  type="text"
+                  name="addressLine2"
+                  autocomplete="shipping address-line2"
+                  class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-black/10 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+
+            <div class="col-span-3">
+              <label
+                for="district"
+                class="block text-sm font-medium leading-6 text-gray-900"
+              >District
+              </label>
+              <div class="mt-2">
+                <input
+                  :disabled="loading"
+                  required
+                  id="district"
+                  x-model="$store.user.address.district"
+                  type="text"
+                  name="district"
+                  autocomplete="address-level2"
+                  class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-black/10 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+
+            <div class="col-span-3">
+              <label
+                for="cityOrProvince"
+                class="block text-sm font-medium leading-6 text-gray-900"
+              >City/Province
+              </label>
+              <div class="mt-2">
+                <input
+                  :disabled="loading"
+                  required
+                  id="cityOrProvince"
+                  x-model="$store.user.address.cityOrProvince"
+                  type="text"
+                  name="cityOrProvince"
+                  autocomplete="address-level1"
+                  class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-black/10 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+
+            <div class="mt-2">
+              <button
+                type="submit"
+                class="grid h-9 w-16 place-content-center rounded-md bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-teal-700 dark:hover:bg-teal-500"
+                x-html="loading ? 
+                `<div class='animate-spin h-4 w-4 border-[3px] border-current border-t-transparent text-white rounded-full dark:text-white' role='status' aria-label='loading'>
+                  <span class='sr-only'>Loading...</span>
+                </div>` : 'Save'"
+              >
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </main>
+
+{{! prettier-ignore}}
+{{#content "script"}}
+<script>
+  document.addEventListener("alpine:init",  () => {
+    Alpine.store('upload', {
+      authInfo: null,
+
+      async getAuthInfo() {
+        if (this.authInfo) {
+          return this.authInfo;
+        }
+
+        try {
+          const response = await fetch('/api/user/avatar/upload_signature')
+          if (response.ok) {
+            this.authInfo = await response.json()
+            return this.authInfo
+          } else {
+            return null;
+          }
+        } catch (err) {
+          return null;
+        }
+      },
+
+      get elem() {
+        return document.getElementById('avatar-upload');
+      },
+
+      check() {
+        const elem = this.elem;
+        const file = elem.files[0];
+        if (!file) return;
+
+        if (file.type !== 'image/png' && file.type !== 'image/jpeg' && file.type !== 'image/webp') {
+          elem.value = "";
+          toast("Invalid file type!", {type: "warning"});
+        }
+      },
+    });
+
+    Alpine.store('user', {
+      id: '{{user.id}}',
+      email: '{{user.email}}',
+      fullName: '{{user.fullName}}',
+      avatar: '{{user.avatar}}',
+      address: {{{toString user.address}}},
+
+      password: {
+        current: '',
+        new: '',
+        confirm: '',
+      },
+
+      async updateAddress() {
+        try {
+          const response = await fetch('/api/user/address', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(this.address),
+          })
+
+          if (response.ok) {
+            toast("Address updated successfully!", {type: "success"});
+          } else {
+            const responseJson = await response.json()
+            toast(responseJson.error.message, {type: responseJson.error.type});
+          }
+        } catch (_) {
+          toast("Cannot communicate with server. Please try again later!", {type: "warning"});
+        }
+      },
+
+      async updatePassword() {
+        if (this.password.new !== this.password.confirm) {
+          toast("Confirm password does not match!", {type: "warning"});
+          return;
+        }
+        if (this.password.new.length < 6) {
+          toast("Password must be at least 6 characters!", {type: "warning"});
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/user/password', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              currentPassword: this.password.current,
+              newPassword: this.password.new,
+            }),
+          })
+
+
+          if (response.ok) {
+            toast("Password updated successfully!", {type: "success"});
+            this.password.current = this.password.new = this.password.confirm = '';
+          } else {
+            const responseJson = await response.json()
+            toast(responseJson.error.message, {type: responseJson.error.type});
+          }
+        } catch (err) {
+          toast("Cannot communicate with server. Please try again later!", {type: "warning"});
+        }
+      },
+
+      async updateInfo() {
+        const file = Alpine.store('upload').elem.files[0];
+        if (!file) {
+          try {
+            const response = await fetch('/api/user/info', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                fullName: this.fullName,
+              }),
+            });
+
+            if (!response.ok) {
+              const responseJson = await response.json()
+              toast(responseJson.error.message, {type: responseJson.error.type});
+              return;
+            } 
+
+            toast("Personal information updated successfully!", {type: "success"});
+          } catch (err) {
+            toast("Cannot communicate with server. Please try again later!", {type: "warning"});
+          }
+          return;
+        }
+
+        const authInfo = await Alpine.store('upload').getAuthInfo()
+        if (!authInfo) {
+          toast("Cannot upload image at the moment. Please try again later!", {type: "warning"});
+          return;
+        }
+
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('api_key', authInfo.api_key);
+          formData.append('timestamp', authInfo.timestamp);
+          formData.append('signature', authInfo.signature);
+          formData.append('upload_preset', authInfo.upload_preset);
+
+          const url = "https://api.cloudinary.com/v1_1/" + authInfo.cloud_name + "/image/upload";
+          const response = await fetch(url, {
+            method: 'POST',
+            body: formData,
+          })
+
+
+          if (!response.ok) {
+            toast("Timeout. Please reload the page!", {type: "warning"});
+            return;
+          }
+
+          const responseJson = await response.json()
+          const newAvatar = responseJson.secure_url;
+
+          const response2 = await fetch('/api/user/info', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              avatar: newAvatar,
+              fullName: this.fullName,
+            }),
+          });
+
+          if (!response2.ok) {
+            const responseJson2 = await response2.json()
+            toast(responseJson2.error.message, {type: responseJson2.error.type});
+            return;
+          } 
+
+          this.avatar = newAvatar;          
+          toast("Personal information updated successfully!", {type: "success"});
+        } catch (err) {
+          console.log(err)
+          toast("Cannot upload image at the moment. Please try again later!", {type: "warning"});
+        }
+      }
+    });
+  });
+</script>
+{{/content}}

@@ -11,6 +11,23 @@ const utcTimeField = (field) => {
 };
 
 /**
+ * Get user account's password by id
+ * @param {number} userId
+ * @returns password
+ */
+exports.getUserPasswordById = (userId) => {
+  const query = db
+    .select({ password: user.password })
+    .from(user)
+    .where(eq(user.id, userId))
+    .limit(1);
+
+  return query.then((val) => {
+    return val.length ? val[0].password : null;
+  });
+};
+
+/**
  * Get user account's password by email
  * @param {String} email
  * @returns password
@@ -27,6 +44,7 @@ exports.getUserPasswordByEmail = (email) => {
   });
 };
 
+//TODO: move to user component
 /**
  * Check if user account exists by email
  * @param {string} email
@@ -46,6 +64,7 @@ exports.existsUser = (email) => {
   });
 };
 
+//TODO: move to user component
 /**
  * Create user account
  * @param {Object} userData
@@ -147,22 +166,31 @@ exports.getTokenById = (userId, includeEmail = false) => {
 };
 
 /**
- * Change password of user account with email
- * @param {String} email
+ * Change password of user account
+ * @param {String} userId
  * @param {String} newPassword
  * @returns
  */
-exports.changePassword = (email, newPassword) => {
+exports.changePassword = (userId, newPassword) => {
   return bcrypt.hash(newPassword, SaltRounds).then((hash) => {
-    const query = db
+    return db
       .update(user)
       .set({
         password: hash,
       })
-      .where(eq(user.email, email));
+      .where(eq(user.id, userId));
+  });
+};
 
-    return query.then((val) => {
-      return val;
-    });
+exports.comparePassword = (userId, password) => {
+  const query = db
+    .select({ password: user.password })
+    .from(user)
+    .where(eq(user.id, userId))
+    .limit(1);
+
+  return query.then((val) => {
+    if (!val.length) throw new Error("User not found");
+    return bcrypt.compare(password, val[0].password);
   });
 };

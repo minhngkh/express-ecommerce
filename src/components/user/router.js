@@ -7,10 +7,6 @@ const router = express.Router();
 
 router.use(authenticated.require);
 
-router.get(
-  "/profile",
-  authenticated.updateUserInfoInSession(["fullName"]),
-  userController.renderProfile,
-);
+router.get("/profile", userController.renderProfile);
 
 module.exports = router;

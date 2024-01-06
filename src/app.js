@@ -13,6 +13,7 @@ const hbsHelpers = require("#utils/hbsHelpers");
 const apiAuthRouter = require("#components/auth/api/router");
 const apiCartRouter = require("#components/cart/api/router");
 const apiProductRouter = require("#components/products/api/router");
+const apiUserRouter = require("#components/user/api/router");
 
 const authRouter = require("#components/auth/router");
 const cartRouter = require("#components/cart/router");
@@ -53,8 +54,9 @@ app.use((req, res, next) => {
 
 // Setup routes
 app.use("/api/auth", apiAuthRouter);
-app.use("/api/products", apiProductRouter);
 app.use("/api/cart", apiCartRouter);
+app.use("/api/products", apiProductRouter);
+app.use("/api/user", apiUserRouter);
 
 // Populate user info (outside of id and email) into session if
 // authenticated, this will not call db if session already has the info
