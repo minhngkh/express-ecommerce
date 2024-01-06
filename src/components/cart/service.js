@@ -1,4 +1,4 @@
-const { and, desc, eq, sql } = require("drizzle-orm");
+const { and, desc, eq, isNull, sql } = require("drizzle-orm");
 
 const db = require("#db/client");
 const {
@@ -88,7 +88,7 @@ exports.getCartItems = (cartId) => {
     .set({
       expiration: NewExpiration,
     })
-    .where(eq(cart.id, cartId));
+    .where(and(eq(cart.id, cartId), isNull(cart.userId)));
 
   return db.batch([getItems, renewExpiration]).then((val) => val[0]);
 };
@@ -187,15 +187,22 @@ exports.getCartOfUser = (userId) => {
   const query = db
     .select({
       id: cart.id,
+      expiration: cart.expiration,
     })
     .from(cart)
-    .where(and(eq(cart.userId, userId)))
-    .orderBy(desc(cart.expiration))
+    .where(and(eq(cart.userId, userId), isNull(cart.expiration)))
     .limit(1);
 
   return query.then((val) => {
     return val.length ? val[0].id : null;
   });
+};
+
+exports.deleteCart = (cartId) => {
+  return db
+    .update(cart)
+    .set({ expiration: sql`current_timestamp` })
+    .where(eq(cart.id, cartId));
 };
 
 // Helpers

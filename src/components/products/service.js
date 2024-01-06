@@ -331,3 +331,22 @@ const createConditionsList = (query) => {
 
   return conditions;
 };
+
+/**
+ * Get prices for list of products
+ * @param {number[]} productIds
+ * @returns
+ */
+exports.getPrices = (productIds) => {
+  const query = db
+    .select({
+      id: product.id,
+      price: product.price,
+    })
+    .from(product)
+    .where(or(...productIds.map((id) => eq(product.id, id))));
+
+  return query.then((val) => {
+    return Object.assign({}, ...val.map((e) => ({ [e.id]: e.price })));
+  });
+};

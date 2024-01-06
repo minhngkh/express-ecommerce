@@ -12,12 +12,15 @@ const hbsHelpers = require("#utils/hbsHelpers");
 
 const apiAuthRouter = require("#components/auth/api/router");
 const apiCartRouter = require("#components/cart/api/router");
-const apiProductRouter = require("#components/products/api/router");
+const apiOrdersRouter = require("#components/orders/api/router");
+const apiProductsRouter = require("#components/products/api/router");
 const apiUserRouter = require("#components/user/api/router");
 
 const authRouter = require("#components/auth/router");
 const cartRouter = require("#components/cart/router");
+const checkoutRouter = require("#components/checkout/router");
 const homeRouter = require("#components/home/router");
+const ordersRouter = require("#components/orders/router");
 const productsRouter = require("#components/products/router");
 const testRouter = require("#components/test/router");
 const userRouter = require("#components/user/router");
@@ -36,7 +39,7 @@ hbs.registerHelper(hbsHelpers);
 hbs.registerHelper(hbsLayouts(hbs.handlebars));
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "../public")));
 
 app.use(logger("dev"));
@@ -52,15 +55,17 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(authenticated.updateCartInfoInSession);
+
 // Setup routes
 app.use("/api/auth", apiAuthRouter);
 app.use("/api/cart", apiCartRouter);
-app.use("/api/products", apiProductRouter);
+app.use("/api/orders", apiOrdersRouter);
+app.use("/api/products", apiProductsRouter);
 app.use("/api/user", apiUserRouter);
 
-// Populate user info (outside of id and email) into session if
-// authenticated, this will not call db if session already has the info
 app.use(authenticated.updateUserInfoInSession(["fullName"]));
+
 //Set the user info to locals for view engine access
 app.use((req, res, next) => {
   if (res.locals.isAuthenticated) {
@@ -72,6 +77,8 @@ app.use((req, res, next) => {
 app.use("/", homeRouter);
 app.use("/auth", authRouter);
 app.use("/cart", cartRouter);
+app.use("/checkout", checkoutRouter);
+app.use("/orders", ordersRouter);
 app.use("/products", productsRouter);
 app.use("/test", testRouter);
 app.use("/user", userRouter);
