@@ -49,7 +49,6 @@ exports.updatePassword = [
   ],
 
   async (req, res, _) => {
-    console.log(req.body);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -107,7 +106,6 @@ exports.updateInfo = [
 
     const userData = matchedData(req);
     const promises = [];
-    console.log(req.user.id);
     if (userData.avatar) {
       const { avatar: oldAvatar } = await userService.getUserInfo(req.user.id, [
         "avatar",
@@ -119,8 +117,6 @@ exports.updateInfo = [
 
     const results = await Promise.allSettled(promises);
 
-    console.log(results);
-
     if (results[results.length - 1].status === "rejected") {
       return res.status(403).json({
         error: {
@@ -129,6 +125,9 @@ exports.updateInfo = [
         },
       });
     }
+
+    // Update session data
+    req.session.userInfo.fullName = userData.fullName;
 
     res.status(200).end();
   },

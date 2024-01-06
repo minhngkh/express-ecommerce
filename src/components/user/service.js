@@ -56,7 +56,7 @@ exports.getUserInfoWithAddress = (userId) => {
       },
     })
     .from(user)
-    .innerJoin(address, eq(user.addressId, address.id))
+    .leftJoin(address, eq(user.addressId, address.id))
     .where(eq(user.id, userId));
 
   return query.then((val) => {
@@ -163,6 +163,7 @@ exports.updateUserAddress = (userId, addressData) => {
 exports.getUserAddress = (userId) => {
   const query = db
     .select({
+      id: address.id,
       fullName: address.fullName,
       phoneNumber: address.phoneNumber,
       addressLine1: address.addressLine1,

@@ -400,7 +400,7 @@
       email: '{{user.email}}',
       fullName: '{{user.fullName}}',
       avatar: '{{user.avatar}}',
-      address: {{{toString user.address}}},
+      address: {{{toString user.address}}} || {},
 
       password: {
         current: '',
