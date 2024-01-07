@@ -223,7 +223,7 @@ exports.renderVerificationMessage = (req, res, _) => {
 // Reset password here
 exports.renderForgotPasswordForm = (req, res, _) => {
   res.render("sendResetPassword", { title: "Forgot password" });
-}
+};
 
 exports.sendResetPasswordEmail = async (req, res, _) => {
   const { email } = req.body;
@@ -260,7 +260,7 @@ exports.verifyPasswordResetToken = (req, res, _) => {
   } else {
     res.send("Invalid token");
   }
-}
+};
 
 exports.resetPassword = async (req, res, _) => {
   const { token } = req.params;
@@ -269,8 +269,8 @@ exports.resetPassword = async (req, res, _) => {
 
   if (email) {
     await authService.changePassword(email, password);
-    res.json({ msg: "Password changed", email, password });
+    res.send("Your password has been changed");
   } else {
     res.send("Invalid token");
   }
-}
+};
