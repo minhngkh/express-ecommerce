@@ -93,7 +93,10 @@ exports.createOrder = [
         data.address ? data.address : null,
       );
 
-      await cartService.deleteCart(req.session.cartId);
+      await cartService.deleteItemsFromCart(
+        req.session.cartId,
+        data.items.map((i) => i.id),
+      );
       delete req.session.cartId;
 
       return res.status(200).send({

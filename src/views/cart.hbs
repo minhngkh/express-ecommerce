@@ -7,7 +7,7 @@
       <div class="md:w-2/3">
         <ul>
           <template x-for="item in $store.cart.items" :key="item.productId">
-            <template x-if="item.status === 'On stock'">
+            <template x-if="item.status === 'on stock'">
               <li>
                 <div class="w-full rounded-lg">
                   <div
@@ -134,13 +134,13 @@
         </ul>
 
         <h2
-          x-show="$store.cart.items.findIndex((item) => item.status !== 'On stock') !== -1"
+          x-show="$store.cart.items.findIndex((item) => item.status !== 'on stock') !== -1"
           class="mb-2 font-medium"
         >Unavailable</h2>
 
         <ul>
           <template x-for="item in $store.cart.items" :key="item.productId">
-            <template x-if="item.status !== 'On stock'">
+            <template x-if="item.status !== 'on stock'">
               <li>
                 <div class="w-full rounded-lg brightness-90">
                   <div
@@ -295,10 +295,10 @@
           </div>
         </div>
         <a
-          :disabled="subtotal == 0"
-          href="/checkout"
+          :class="subtotal != 0 ? 'cursor-pointer hover:bg-teal-700' : 'cursor-not-allowed opacity-80'"
+          :href="subtotal != 0 ? '/checkout' : '#'"
           type="button"
-          class="mt-6 flex w-full justify-center rounded-md bg-teal-600 py-1.5 font-medium text-blue-50 hover:bg-teal-700 disabled:pointer-events-none"
+          class="mt-6 flex w-full justify-center rounded-md bg-teal-600 py-1.5 font-medium text-blue-50"
         >Check out</a>
       </div>
     </div>
@@ -403,7 +403,7 @@
 
         subtotal() {
           return this.items.reduce((acc, item) => {
-            if (item.status !== "On stock") return acc;
+            if (item.status !== "on stock") return acc;
             return acc + item.price * item.quantity;
           }, 0);
         },

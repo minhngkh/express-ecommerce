@@ -12,6 +12,7 @@ const fieldsDict = {
   avatar: user.avatar,
   createdAt: user.createdAt,
   isVerified: user.isVerified,
+  isBanned: user.isBanned,
 };
 
 /**

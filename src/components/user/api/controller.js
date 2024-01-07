@@ -64,7 +64,7 @@ exports.updatePassword = [
 
     try {
       if (await authService.comparePassword(id, currentPassword)) {
-        await authService.changePassword(id, newPassword);
+        await authService.updatePassword(id, newPassword);
         return res.status(200).end();
       }
 

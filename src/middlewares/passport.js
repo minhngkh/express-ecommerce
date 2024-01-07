@@ -20,6 +20,7 @@ passport.use(
         "id",
         "password",
         "isVerified",
+        "isBanned",
       ]);
 
       if (!result)
@@ -31,6 +32,8 @@ passport.use(
         };
         return cb(null, false, { message: "Account has not been verified" });
       }
+      if (result.isBanned)
+        return cb(null, false, { message: "Account has been banned" });
 
       Object.assign(account, result);
 

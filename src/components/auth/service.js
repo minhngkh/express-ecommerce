@@ -171,7 +171,7 @@ exports.getTokenById = (userId, includeEmail = false) => {
  * @param {String} newPassword
  * @returns
  */
-exports.changePassword = (userId, newPassword) => {
+exports.updatePassword = (userId, newPassword) => {
   return bcrypt.hash(newPassword, SaltRounds).then((hash) => {
     return db
       .update(user)

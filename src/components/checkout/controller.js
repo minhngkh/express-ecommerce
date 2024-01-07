@@ -9,7 +9,7 @@ exports.renderCheckout = async (req, res, next) => {
 
   if (!cartId) return next(createError(404));
 
-  const items = await cartService.getCartItems(cartId);
+  const items = await cartService.getCartItems(cartId, true);
   if (!items.length) return next(createError(404));
 
   items.forEach((item) => {

@@ -59,7 +59,7 @@ exports.addItemToCart = (cartId, productId, quantity) => {
  * @param {number} cartId
  * @returns Items in the cart
  */
-exports.getCartItems = (cartId) => {
+exports.getCartItems = (cartId, onlyAvailable = false) => {
   const getItems = db
     .select({
       productId: cartItem.productId,
@@ -80,7 +80,12 @@ exports.getCartItems = (cartId) => {
         eq(productImage.isPrimary, true),
       ),
     )
-    .where(eq(cartItem.cartId, cartId))
+    .where(
+      and(
+        eq(cartItem.cartId, cartId),
+        ...(onlyAvailable ? [eq(product.status, "on stock")] : []),
+      ),
+    )
     .orderBy(desc(cartItem.updatedAt));
 
   const renewExpiration = db
@@ -203,6 +208,23 @@ exports.deleteCart = (cartId) => {
     .update(cart)
     .set({ expiration: sql`current_timestamp` })
     .where(eq(cart.id, cartId));
+};
+
+/**
+ *
+ * @param {number} cartId
+ * @param {number[]} productIds
+ * @returns
+ */
+exports.deleteItemsFromCart = (cartId, productIds) => {
+  return db
+    .delete(cartItem)
+    .where(
+      and(
+        eq(cartItem.cartId, cartId),
+        ...productIds.map((id) => eq(cartItem.productId, id)),
+      ),
+    );
 };
 
 // Helpers
