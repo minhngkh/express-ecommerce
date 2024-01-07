@@ -220,47 +220,57 @@ exports.renderVerificationMessage = (req, res, _) => {
   });
 };
 
-// exports.renderForgotPasswordForm = (req, res, _) => {
-//   res.render("resetPassword", { title: "Forgot password" });
-// };
+// Reset password here
+exports.renderForgotPasswordForm = (req, res, _) => {
+  res.render("sendResetPassword", { title: "Forgot password" });
+}
 
-// exports.validateSignUpCredentials = [
-//   body("email").isEmail().withMessage("Invalid email address"),
-//   body("password")
-//     .isLength({ min: 7, max: 100 })
-//     .withMessage("Password must be between 7 and 100 characters"),
-//   body("confirm-password").custom((value, { req }) => {
-//     if (value !== req.body.password) {
-//       // Handle error page
-//     }
-//     return true;
-//   }),
-// ];
+exports.sendResetPasswordEmail = async (req, res, _) => {
+  const { email } = req.body;
+  const user = await authService.getUserByEmail(email);
 
-// exports.sendResetPasswordEmail = async (req, res, next) => {
-//   const token = crypto.randomBytes(64).toString("hex");
-//   const email = req.body.email;
-//   const password = req.body.password;
+  if (user) {
+    const token = crypto.randomBytes(64).toString("hex");
+    await authService.updateStatus(user.id, { token });
 
-//   try {
-//     await sendEmail(email, "Reset password", "resetPasswordEmail", {
-//       token,
-//       password,
-//       email,
-//     });
-//   } catch (err) {
-//     next(err);
-//   }
-//   redirect("back");
-// };
+    let baseUrl;
+    if (process.env.NODE_ENV === "production") {
+      baseUrl = `${req.protocol}://${req.hostname}`;
+    } else {
+      baseUrl = `http://localhost:${process.env.PORT || 3000}`;
+    }
 
-// exports.verifyPasswordResetToken = (req, res, next) => {
-//   const { email, password, token } = req.params;
-//   userService.changePassword(email, password).then((val) => {
-//     if (val) {
-//       res.send("Password changed");
-//     } else {
-//       res.send("Database error");
-//     }
-//   });
-// };
+    await emailSender.send(email, "Reset password", "resetPasswordEmail", {
+      baseUrl: baseUrl,
+      token: token,
+    });
+
+    res.send(`A reset password link has been sent to ${email}`);
+  } else {
+    res.send(`Email ${email} does not exist`);
+  }
+};
+
+exports.verifyPasswordResetToken = (req, res, _) => {
+  const { token } = req.params;
+  const email = authService.getEmailByToken(token);
+
+  if (email) {
+    res.render("resetPassword", { title: "Reset password", token });
+  } else {
+    res.send("Invalid token");
+  }
+}
+
+exports.resetPassword = async (req, res, _) => {
+  const { token } = req.params;
+  const { password } = req.body;
+  const email = await authService.getEmailByToken(token);
+
+  if (email) {
+    await authService.changePassword(email, password);
+    res.json({ msg: "Password changed", email, password });
+  } else {
+    res.send("Invalid token");
+  }
+}

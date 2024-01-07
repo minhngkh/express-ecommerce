@@ -43,17 +43,15 @@ router.get(
   authController.renderVerificationMessage,
 );
 
-// router.get("/forgot-password", authController.renderForgotPasswordForm);
+// Reset password here
+router.get("/forgot-password", authController.renderForgotPasswordForm);
+router.post(
+  "/forgot-password",
+  // authController.validateForgotPasswordCredentials,
+  authController.sendResetPasswordEmail,
+);
 
-// router.post(
-//   "/forgot-password",
-//   // authController.validateForgotPasswordCredentials,
-//   authController.sendResetPasswordEmail,
-// );
-
-// router.get(
-//   "/forgot-password/:token/:email/:password",
-//   authController.verifyPasswordResetToken,
-// );
+router.get("/forgot-password/verify/:token", authController.verifyPasswordResetToken);
+router.post("/reset-password/:token", authController.resetPassword);
 
 module.exports = router;

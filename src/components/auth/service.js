@@ -129,7 +129,7 @@ exports.updateStatus = async (id, status) => {
  * @param {String} email
  * @returns
  */
-exports.getTokenByEmail = (email) => {
+exports.getTokenByEmail = async (email) => {
   const query = db
     .select({
       value: user.token,
@@ -182,6 +182,35 @@ exports.updatePassword = (userId, newPassword) => {
   });
 };
 
+exports.getEmailByToken = async (token) => {
+  const query = db
+    .select({ email: user.email })
+    .from(user)
+    .where(eq(user.token, token))
+    .limit(1);
+
+  return query.then((val) => {
+    return val.length ? val[0].email : null;
+  });
+}
+
+/**
+ * Change password of user account with email
+ * @param {String} email
+ * @param {String} newPassword
+ * @returns
+ */
+exports.changePassword = async (email, newPassword) => {
+  return bcrypt.hash(newPassword, SaltRounds).then((hash) => {
+    return db
+      .update(user)
+      .set({
+        password: hash,
+      })
+      .where(eq(user.email, email));
+  });
+};
+
 exports.comparePassword = (userId, password) => {
   const query = db
     .select({ password: user.password })
@@ -192,5 +221,30 @@ exports.comparePassword = (userId, password) => {
   return query.then((val) => {
     if (!val.length) throw new Error("User not found");
     return bcrypt.compare(password, val[0].password);
+  });
+};
+
+/**
+ * Get user account by email
+ * @param {String} email
+ * @returns
+ */
+exports.getUserByEmail = async (email) => {
+  const query = db
+    .select({
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      password: user.password,
+      isVerified: user.isVerified,
+      token: user.token,
+      tokenExpiration: utcTimeField(user.tokenExpiration),
+    })
+    .from(user)
+    .where(eq(user.email, email))
+    .limit(1);
+
+  return query.then((val) => {
+    return val.length ? val[0] : null;
   });
 };
