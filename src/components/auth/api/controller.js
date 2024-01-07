@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-const { body, validationResult } = require("express-validator");
+const { param, body, validationResult } = require("express-validator");
 
 const emailSender = require("#lib/emailSender");
 const authService = require("../service");
@@ -36,5 +36,20 @@ exports.sendVerificationEmail = [
       console.log(err);
       res.status(400).end();
     }
+  },
+];
+
+exports.existsEmail = [
+  param("email").notEmpty().isEmail(),
+
+  async (req, res, _) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).end();
+
+    console.log(req.params.email);
+
+    const result = await authService.existsUser(req.params.email);
+    if (result) return res.status(404).end();
+    return res.status(200).end();
   },
 ];

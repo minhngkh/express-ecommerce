@@ -106,6 +106,11 @@ exports.validateSignUpCredentials = [
 ];
 
 exports.authenticateSignUpCredentials = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    req.session.messages = ["Invalid input"];
+    return res.redirect("back");
+  }
   const userExists = await authService.existsUser(req.body.email);
 
   // Existing email

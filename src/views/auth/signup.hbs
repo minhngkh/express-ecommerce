@@ -109,7 +109,15 @@
                 <label
                   for="email"
                   class="mb-2 block text-sm dark:text-white"
-                >Email address</label>
+                >Email address
+                  <button
+                    @click="if ($refs.email.reportValidity()) {await existsEmail($refs.email.value);}"
+                    type="button"
+                    class="ms-3 inline-flex text-xs font-medium text-teal-600 hover:text-teal-700"
+                  >
+                    Check
+                  </button>
+                </label>
                 <div class="relative">
                   <input
                     :class="emailValidity ? 'border-gray-200 focus:border-teal-500 focus:ring-teal-500' : 'border-red-500 focus:border-red-500 focus:ring-red-500'"
@@ -250,3 +258,22 @@
     </div>
   </div>
 </main>
+
+{{! prettier-ignore}}
+{{#content "script"}}
+<script>
+  const existsEmail = async (email) => {
+    try {
+      const response = await fetch(`/api/auth/availability/email/${email}`);
+      if (response.status === 404) {
+        toast("This email is not available", {type: "warning"})
+        return;
+      }
+
+      toast("This email is available", {type: "success"})
+    } catch (err) {
+      toast("Invalid email format", {type: "warning"})
+    }
+  }
+</script>
+{{/content}}
