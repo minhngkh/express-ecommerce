@@ -38,6 +38,8 @@ const ListOrder = {
   PriceDesc: "price-desc",
 };
 
+const IsDeletedCondition = eq(product.isDeleted, false);
+
 /**
  * @typedef {Object} Query
  * @property {?string[]} subcategories
@@ -87,7 +89,7 @@ exports.getProducts = (category, query) => {
         eq(productImage.isPrimary, true),
       ),
     )
-    .where(and(...conditions))
+    .where(and(...conditions, IsDeletedCondition))
     .orderBy(order)
     .limit(query.limit)
     .offset((query.page - 1) * query.limit);
@@ -152,7 +154,7 @@ exports.getProductDetails = (category, id) => {
       eq(product.id, ProductExtendedTable[category].productId),
     )
     .innerJoin(productBrand, eq(product.brandId, productBrand.id))
-    .where(eq(product.id, id))
+    .where(and(eq(product.id, id), IsDeletedCondition))
     .limit(1);
 
   return query.then((val) => {
@@ -220,6 +222,7 @@ exports.getRandomProducts = (category, limit, exceptId) => {
       and(
         // eq(product.subcategoryId, exceptId),
         ne(product.id, exceptId),
+        IsDeletedCondition,
       ),
     )
     .orderBy(sql`random()`)
@@ -248,7 +251,7 @@ exports.getNumProducts = (category, query) => {
       productSubcategory,
       eq(product.subcategoryId, productSubcategory.id),
     )
-    .where(and(...conditions));
+    .where(and(...conditions, IsDeletedCondition));
 
   return dbQuery.then((val) => {
     return val[0].count;
@@ -330,4 +333,23 @@ const createConditionsList = (query) => {
   }
 
   return conditions;
+};
+
+/**
+ * Get prices for list of products
+ * @param {number[]} productIds
+ * @returns
+ */
+exports.getPrices = (productIds) => {
+  const query = db
+    .select({
+      id: product.id,
+      price: product.price,
+    })
+    .from(product)
+    .where(or(...productIds.map((id) => eq(product.id, id))));
+
+  return query.then((val) => {
+    return Object.assign({}, ...val.map((e) => ({ [e.id]: e.price })));
+  });
 };

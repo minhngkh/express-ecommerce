@@ -444,9 +444,11 @@
 
       <div class="mt-8 grid grid-cols-1 gap-x-16 gap-y-12 lg:grid-cols-2">
         {{#each reviews.others}}
-          <blockquote>
+          <blockquote class="max-w-screen-sm">
             <header class="sm:flex sm:items-center">
-              <span class="mr-1 text-sm text-gray-600">{{rating}}</span>
+              <span
+                class="text-md mr-1 font-medium text-gray-900"
+              >{{rating}}</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-5 w-5 text-yellow-400"
@@ -487,8 +489,8 @@
 
   <!-- User Review -->
   {{#if user}}
-    <div class="mx-auto max-w-screen-md px-4 py-8 sm:px-6 lg:px-8">
-      <h3 class="font-semibold">Your review:</h3>
+    <div class="mx-auto max-w-screen-sm px-4 py-8 sm:px-6 lg:px-8">
+      <h3 class="mb-4 font-semibold">Your review:</h3>
 
       <!-- Current Review -->
       <div x-show="!$store.userReview.showInputArea">
@@ -496,7 +498,7 @@
           <header class="sm:flex sm:items-center">
             <span
               x-text="$store.userReview.rating"
-              class="mr-1 text-sm text-gray-600"
+              class="text-md mr-1 font-medium text-gray-900"
             ></span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -553,7 +555,7 @@
                 x-model="$store.userReview.input.comment"
                 id="comment"
                 name="comment"
-                class="w-full resize-none border-none align-top focus:ring-0 dark:bg-gray-800 dark:text-white sm:text-sm"
+                class="w-full resize-none border-none align-top focus:ring-0 dark:bg-gray-800 dark:text-white"
                 rows="4"
                 placeholder="Enter your review..."
               ></textarea>

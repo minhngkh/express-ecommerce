@@ -61,6 +61,10 @@
           toast(...JSON.parse(toastParams));
           localStorage.removeItem('toast');
         }
+
+        {{#if toast}}
+          toast(...{{{toString toast}}});
+        {{/if}}
       });
 
       const toast = ('notify', (message, options = {}) => {
@@ -94,14 +98,21 @@
         };
       }
 
-      const toLocalDate = (time) => {
+      const toLocalDate = (time, inDetail=false) => {
         if (!time) {
           return "";
         }
-
         const date = new Date(time);
+        if (inDetail) {
+          return date.toISOString().replace("T"," ").substring(0, 19);
+        }
         return date.toISOString().split('T')[0];
       }
+
+      const currencyFormatter = new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+      });
     </script>
 
     {{#block "script"}}{{/block}}

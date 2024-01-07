@@ -1,5 +1,6 @@
 const createError = require("http-errors");
-const userService = require("../components/user/service");
+const userService = require("#components/user/service");
+const cartService = require("#components/cart/service");
 
 exports.require = (req, res, next) => {
   if (!res.locals.isAuthenticated) {
@@ -42,4 +43,26 @@ exports.updateUserInfoInSession = (fields) => {
       return next(err);
     }
   };
+};
+
+exports.updateCartInfoInSession = async (req, res, next) => {
+  if (!res.locals.isAuthenticated) {
+    return next();
+  }
+  if (Object.hasOwn(req.session, "cartId") && req.session.cartId !== null) {
+    return next();
+  }
+
+  try {
+    const cartId = await cartService.getCartOfUser(req.user.id);
+    if (cartId !== null) {
+      req.session.cartId = cartId;
+      return next();
+    }
+    console.log("Create new cart");
+    req.session.cartId = await cartService.createCart(req.user.id);
+    return next();
+  } catch (err) {
+    return next(err);
+  }
 };

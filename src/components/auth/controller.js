@@ -1,18 +1,50 @@
-const { body } = require("express-validator");
+const crypto = require("crypto");
+const { body, param, validationResult } = require("express-validator");
+const createError = require("http-errors");
 
+const emailSender = require("#lib/emailSender");
 const cartService = require("#components/cart/service");
 const passport = require("#middlewares/passport");
 const { trimUrl } = require("#utils/formatter");
-const userService = require("./service");
+const authService = require("./service");
 
 //TODO: Check validation errors
 
 exports.renderSignUpForm = (req, res, _) => {
-  res.render("auth/signup", { title: "Sign up" });
+  let msg = null;
+  if (req.session.messages && req.session.messages.length) {
+    msg = req.session.messages[0];
+    req.session.messages = null;
+  }
+  res.render("auth/signup", {
+    title: "Sign up",
+    toast: msg ? [msg, { type: "danger" }] : null,
+  });
 };
 
 exports.renderSignInForm = (req, res, _) => {
-  res.render("auth/signin", { title: "Sign in" });
+  let msg = null;
+  if (req.session.messages && req.session.messages.length) {
+    msg = req.session.messages[0];
+    req.session.messages = null;
+
+    if (msg === "Account has not been verified") {
+      const { id, email } = req.session.unverifiedUser;
+      return res.render("auth/verify", {
+        title: "Account verification",
+        msg: "Your account has not been verified. Please open the verification link sent to your email.",
+        hasResendButton: true,
+
+        id: id,
+        email: email,
+      });
+    }
+  }
+
+  res.render("auth/signin", {
+    title: "Sign in",
+    toast: msg ? [msg, { type: "danger" }] : null,
+  });
 };
 
 exports.signOut = (req, res, next) => {
@@ -31,6 +63,7 @@ exports.validateSignInCredentials = [
 
 exports.authenticateSignInCredentials = passport.authenticate("local", {
   failureRedirect: "back",
+  failureMessage: true,
 });
 
 exports.processOnSuccess = async (req, res, next) => {
@@ -53,7 +86,9 @@ exports.processOnSuccess = async (req, res, next) => {
   } catch (err) {
     return next(err);
   }
-
+  if (res.locals.doNotRedirect) {
+    return next();
+  }
   res.redirect(trimUrl(req.query.next) || "/");
 };
 
@@ -71,7 +106,12 @@ exports.validateSignUpCredentials = [
 ];
 
 exports.authenticateSignUpCredentials = async (req, res, next) => {
-  const userExists = await userService.existsUser(req.body.email);
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    req.session.messages = ["Invalid input"];
+    return res.redirect("back");
+  }
+  const userExists = await authService.existsUser(req.body.email);
 
   // Existing email
   if (userExists) {
@@ -79,30 +119,163 @@ exports.authenticateSignUpCredentials = async (req, res, next) => {
   }
 
   try {
-    const id = await userService.createUser({
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
+    const { name, email, password } = req.body;
+    const id = await authService.createUser({
+      name: name,
+      email: email,
+      password: password,
     });
 
-    req.login(
-      {
-        id: id,
-        email: req.body.email,
-      },
-      (err) => {
-        if (err) {
-          return next(err);
-        }
-        next();
-      },
-    );
+    res.locals.unverifiedUser = {
+      id: id,
+      email: email,
+    };
+
+    next();
   } catch (err) {
-    res.redirect("back");
+    next(err);
   }
 };
 
 exports.retainSessionInfo = (req, res, next) => {
   res.locals.sessionCartId = req.session.cartId;
   next();
+};
+
+exports.sendVerificationEmail = async (req, res, next) => {
+  const { id, email } = res.locals.unverifiedUser;
+
+  try {
+    const token = crypto.randomBytes(64).toString("hex");
+    await authService.updateStatus(id, { token: token });
+
+    let baseUrl;
+    if (process.env.NODE_ENV === "production") {
+      baseUrl = `${req.protocol}://${req.hostname}`;
+    } else {
+      baseUrl = `http://localhost:${process.env.PORT || 3000}`;
+    }
+
+    await emailSender.send(email, "Verify email", "verifyEmail", {
+      baseUrl: baseUrl,
+      id: id,
+      token: token,
+      email: email,
+    });
+
+    res.render("auth/verify", {
+      title: "Account verification",
+      msg: `A verification link has been sent to ${email}`,
+      hasResendButton: true,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.verifyToken = [
+  param("id").notEmpty().isInt({ min: 0 }),
+
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return next(createError(400));
+
+    const userId = Number(req.params.id);
+    const token = req.params.token;
+
+    const trueToken = await authService.getTokenById(userId);
+
+    if (trueToken === null || trueToken.value === null) {
+      return next(createError(400));
+    }
+    if (
+      trueToken.value !== token ||
+      new Date(trueToken.expiration) < new Date()
+    ) {
+      return res.render("auth/verify", {
+        title: "Account verification",
+        msg: "Your account verification link is expired",
+        hasResendButton: true,
+      });
+    }
+
+    await authService.updateStatus(userId, { isVerified: true, token: null });
+
+    req.login(
+      {
+        id: userId,
+        email: trueToken.ofEmail,
+      },
+      (err) => {
+        if (err) {
+          return next(err);
+        }
+      },
+    );
+
+    res.locals.doNotRedirect = true;
+    next();
+  },
+];
+
+exports.renderVerificationMessage = (req, res, _) => {
+  res.render("auth/verify", {
+    title: "Account verification",
+    msg: "Your account has been verified",
+  });
+};
+
+// Reset password here
+exports.renderForgotPasswordForm = (req, res, _) => {
+  res.render("sendResetPassword", { title: "Forgot password" });
+};
+
+exports.sendResetPasswordEmail = async (req, res, _) => {
+  const { email } = req.body;
+  const user = await authService.getUserByEmail(email);
+
+  if (user) {
+    const token = crypto.randomBytes(64).toString("hex");
+    await authService.updateStatus(user.id, { token });
+
+    let baseUrl;
+    if (process.env.NODE_ENV === "production") {
+      baseUrl = `${req.protocol}://${req.hostname}`;
+    } else {
+      baseUrl = `http://localhost:${process.env.PORT || 3000}`;
+    }
+
+    await emailSender.send(email, "Reset password", "resetPasswordEmail", {
+      baseUrl: baseUrl,
+      token: token,
+    });
+
+    res.send(`A reset password link has been sent to ${email}`);
+  } else {
+    res.send(`Email ${email} does not exist`);
+  }
+};
+
+exports.verifyPasswordResetToken = (req, res, _) => {
+  const { token } = req.params;
+  const email = authService.getEmailByToken(token);
+
+  if (email) {
+    res.render("resetPassword", { title: "Reset password", token });
+  } else {
+    res.send("Invalid token");
+  }
+};
+
+exports.resetPassword = async (req, res, _) => {
+  const { token } = req.params;
+  const { password } = req.body;
+  const email = await authService.getEmailByToken(token);
+
+  if (email) {
+    await authService.changePassword(email, password);
+    res.send("Your password has been changed");
+  } else {
+    res.send("Invalid token");
+  }
 };

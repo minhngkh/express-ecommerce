@@ -30,9 +30,28 @@ router.post(
 router.post(
   "/signup",
   authController.validateSignUpCredentials,
-  authController.retainSessionInfo,
+  // authController.retainSessionInfo,
   authController.authenticateSignUpCredentials,
-  authController.processOnSuccess,
+  authController.sendVerificationEmail,
 );
+
+router.get(
+  "/verify/:id/:token",
+  authController.retainSessionInfo,
+  authController.verifyToken,
+  authController.processOnSuccess,
+  authController.renderVerificationMessage,
+);
+
+// Reset password here
+router.get("/forgot-password", authController.renderForgotPasswordForm);
+router.post(
+  "/forgot-password",
+  // authController.validateForgotPasswordCredentials,
+  authController.sendResetPasswordEmail,
+);
+
+router.get("/forgot-password/verify/:token", authController.verifyPasswordResetToken);
+router.post("/reset-password/:token", authController.resetPassword);
 
 module.exports = router;

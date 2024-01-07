@@ -9,8 +9,9 @@ passport.use(
     {
       usernameField: "email",
       passwordField: "password",
+      passReqToCallback: true,
     },
-    async (email, password, cb) => {
+    async (req, email, password, cb) => {
       const account = {
         email: email,
       };
@@ -18,9 +19,22 @@ passport.use(
       const result = await usersServices.getUserInfoFromEmail(email, [
         "id",
         "password",
+        "isVerified",
+        "isBanned",
       ]);
 
-      if (!result) return cb(null, false, { message: "Incorrect email." });
+      if (!result)
+        return cb(null, false, { message: "Incorrect email or password" });
+      if (!result.isVerified) {
+        req.session.unverifiedUser = {
+          id: result.id,
+          email: email,
+        };
+        return cb(null, false, { message: "Account has not been verified" });
+      }
+      if (result.isBanned)
+        return cb(null, false, { message: "Account has been banned" });
+
       Object.assign(account, result);
 
       bcrypt.compare(password, account.password, (err, result) => {
@@ -29,9 +43,7 @@ passport.use(
         }
 
         if (!result) {
-          return cb(null, false, {
-            message: "Incorrect password.",
-          });
+          return cb(null, false, { message: "Incorrect email or password" });
         }
 
         return cb(null, account);

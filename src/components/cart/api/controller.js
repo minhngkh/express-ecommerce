@@ -1,18 +1,8 @@
 const cartService = require("../service");
 
 exports.addItemToCart = async (req, res, _) => {
-  let { cartId } = req.session;
-  if (!cartId) {
-    if (res.locals.isAuthenticated) {
-      cartId = await cartService.getCartOfUser(req.user.id);
-      if (cartId === null) {
-        cartId = await cartService.createCart(req.user.id);
-      }
-    } else {
-      cartId = await cartService.createCart();
-    }
-
-    req.session.cartId = cartId;
+  if (!req.session.cartId) {
+    req.session.cartId = await cartService.createCart();
   }
 
   const productId = Number(req.body.productId);
@@ -25,8 +15,7 @@ exports.addItemToCart = async (req, res, _) => {
   }
 
   try {
-    await cartService.addItemToCart(cartId, productId, quantity);
-
+    await cartService.addItemToCart(req.session.cartId, productId, quantity);
     res.status(200).end();
   } catch (err) {
     res.status(400).end();

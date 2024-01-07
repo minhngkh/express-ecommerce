@@ -3,18 +3,15 @@ const createError = require("http-errors");
 const userService = require("./service");
 
 exports.renderProfile = async (req, res, next) => {
-  const result = await userService.getUserInfo(req.user.id, ["fullName"]);
-  const fullName = result.fullName;
+  const result = await userService.getUserInfoWithAddress(req.user.id);
+  if (!result) return next(createError(500));
 
-  if (typeof fullName === "undefined") {
-    return next(createError(500));
-  }
+  const msg = req.session.message;
+  req.session.message = null;
 
   res.render("user/profile", {
     title: "Profile",
-    user: {
-      email: req.user.email,
-      fullName: fullName,
-    },
+    user: result,
+    toast: msg ? [msg.content, { type: msg.type }] : null,
   });
 };

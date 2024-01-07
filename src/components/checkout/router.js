@@ -1,12 +1,12 @@
 const express = require("express");
 
 const authenticated = require("#middlewares/authenticated");
-const userController = require("./controller");
+const checkoutController = require("./controller");
 
 const router = express.Router();
 
-router.use(authenticated.require);
+router.use("/", authenticated.require);
 
-router.get("/profile", userController.renderProfile);
+router.get("/", checkoutController.renderCheckout);
 
 module.exports = router;

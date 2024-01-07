@@ -1,0 +1,76 @@
+<main class="flex w-full justify-center">
+  <div
+    class="max-w-screen-sm overflow-auto px-4 py-10 text-center sm:px-6 lg:px-8"
+  >
+    <div
+      class="flex flex-col rounded-xl border bg-white shadow-sm dark:border-gray-700 dark:bg-slate-900 dark:shadow-slate-700/[.7]"
+    >
+      <div
+        class="flex flex-auto flex-col items-center justify-center p-4 md:p-12"
+      >
+        <h3 class="text-lg font-bold text-gray-800 dark:text-white">
+          Account verification
+        </h3>
+        <p class="mb-4 mt-2 text-gray-500 dark:text-gray-400">
+          {{msg}}
+        </p>
+
+        {{#if hasResendButton}}
+          <button
+            @click="await resendEmail()"
+            class="mb-2 inline-flex items-center gap-x-1 rounded-lg border border-transparent text-sm font-semibold text-teal-600 hover:text-teal-800 disabled:pointer-events-none disabled:opacity-50 dark:text-teal-500 dark:hover:text-teal-400 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+          >
+
+            Resend
+          </button>
+        {{/if}}
+        <a
+          class="inline-flex items-center gap-x-1 rounded-lg border border-transparent text-sm font-semibold text-teal-600 hover:text-teal-800 disabled:pointer-events-none disabled:opacity-50 dark:text-teal-500 dark:hover:text-teal-400 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+          href="/"
+        >
+
+          Back to homepage
+          <svg
+            class="h-4 w-4 flex-shrink-0"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ><path d="m9 18 6-6-6-6" /></svg>
+        </a>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+{{! prettier-ignore}}
+{{#content "script"}}
+  <script>
+    const resendEmail= async () => {
+      try {
+        const response = await fetch('/api/auth/verify/resend', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: {{id}},
+            email: '{{email}}',
+          }),
+        });
+
+        if (!response.ok) throw new Error();
+
+        toast('Email has been sent. Please check your inbox.', {type: 'success'});
+      } catch (err) {
+        toast('Unable to send email. Please try again later.', {type: 'danger'});
+      }
+    };
+  </script>
+{{/content}}
