@@ -1,34 +1,189 @@
-<div style="width: {{ size }}" ><canvas id="statistics"></canvas></div>
+<style>
+  .charts { 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 80px;
+	}
+
+	.top-revenue {
+		display: flex;
+		justify-content: space-around;
+		flex-wrap: wrap;
+		gap: 80px;
+	}
+	
+	.top-product-header {
+		text-align: center;
+		font-size: 24px;
+    margin-bottom: 16px;
+	}
+	
+	.top-product-table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+	
+	.top-product-table th,
+	.top-product-table td {
+		padding: 8px;
+		border: 1px solid #ccc;
+	}
+
+	.header {
+		text-align: center;
+		font-weight: 500;
+		font-size: 32px;
+		margin-bottom: 16px;
+	}
+</style>
+
+<div class="charts">
+	<h2 class="header">Statistics</h2>
+  <div style="width: {{size}};"><canvas id="statistics-day"></canvas></div>
+  <div style="width: {{size}};"><canvas id="statistics-month"></canvas></div>
+  <div style="width: {{size}};"><canvas id="statistics-year"></canvas></div>
+
+	<h2 class="header">Top Products</h2>
+  <div class="top-revenue">
+    <div>
+      <h2 class="top-product-header">Top 24h Revenue</h2>
+      <table class="top-product-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each _24hRevenue}}
+            <tr>
+              <td>{{name}}</td>
+              <td>{{total}} $</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h2 class="top-product-header">Top Day Revenue</h2>
+      <table class="top-product-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each dayRevenue}}
+            <tr>
+              <td>{{name}}</td>
+              <td>{{total}} $</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h2 class="top-product-header">Top Month Revenue</h2>
+      <table class="top-product-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each monthRevenue}}
+            <tr>
+              <td>{{name}}</td>
+              <td>{{total}} $</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h2 class="top-product-header">Top Year Revenue</h2>
+      <table class="top-product-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each yearRevenue}}
+            <tr>
+              <td>{{name}}</td>
+              <td>{{total}} $</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
 {{! prettier-ignore }}
 {{#content "script"}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const data = {{{ data }}};
-        const name = "{{ name }}";
         const type = "{{ type }}";
+        options = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        stepSize: 1
+                    }
+                }]
+            }
+        };
+
+        const dayChart = {{{ dayChart }}};
         (async function() { 
-            new Chart(document.getElementById("statistics"), {
+            new Chart(document.getElementById("statistics-day"), {
             type,
             data: {
-                labels: data.map((item) => item.name),
+                labels: dayChart.map((item) => item.name),
                 datasets: [{
-                    label: name,
-                    data: data.map((item) => item.total),                       
+                    label: "Day Statistics",
+                    data: dayChart.map((item) => item.total),                       
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true,
-                            stepSize: 1
-                        }
-                    }]
-                }
-            }
+            options
+        })})();
+
+        const monthChart = {{{ monthChart }}};
+        (async function() { 
+            new Chart(document.getElementById("statistics-month"), {
+            type,
+            data: {
+                labels: monthChart.map((item) => item.name),
+                datasets: [{
+                    label: "Month Statistics",
+                    data: monthChart.map((item) => item.total),                       
+                }]
+            },
+            options
+        })})();
+
+        const yearChart = {{{ yearChart }}};
+        (async function() { 
+            new Chart(document.getElementById("statistics-year"), {
+            type,
+            data: {
+                labels: yearChart.map((item) => item.name),
+                datasets: [{
+                    label: "Year Statistics",
+                    data: yearChart.map((item) => item.total),                       
+                }]
+            },
+            options
         })})();
     </script>
 {{/content}}
