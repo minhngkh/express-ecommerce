@@ -342,170 +342,232 @@
       </div>
 
       <!-- Products -->
-      {{#if products}}
-        <div class="lg:col-span-3">
-          <ul
-            :class="{ 'lg:grid-cols-3': '{{category}}' === 'laptops', 'lg:grid-cols-4': '{{category}}' === 'phones' }"
-            class="grid gap-6 sm:grid-cols-2"
-          >
-            {{#each products}}
-              <li>
-                <a
-                  href="/products/{{@root.category}}/{{id}}"
-                  class="group block overflow-hidden"
-                >
-                  <img
-                    src="{{image}}"
-                    alt=""
-                    onerror="this.onerror=null; this.src='/images/placeholder/product.webp';"
-                    class="aspect-[3/2] object-cover transition duration-500 group-hover:scale-105 xsm:max-h-72"
-                  />
 
-                  <div class="relative bg-white pt-3">
-                    <h3
-                      class="text-xs text-gray-700 group-hover:underline group-hover:underline-offset-4"
-                    >
-                      {{name}}
-                    </h3>
-
-                    <p class="mt-2">
-                      <span class="sr-only"> Regular Price </span>
-
-                      <span class="tracking-wider text-gray-900">
-                        {{price}}</span>
-                    </p>
-                  </div>
-                </a>
-              </li>
-            {{/each}}
-
-          </ul>
-
-          <!-- Pagination -->
-          <nav
-            class="mt-8 inline-flex w-full items-center justify-center gap-3"
-          >
-            {{#if page.prev}}
-              <a
-                class="inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180 dark:border-gray-800 dark:bg-gray-900 dark:text-white"
-                href="/products/{{category}}/?page={{page.prev}}{{rawQuery}}"
-              >
-                <span class="sr-only">Previous Page</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-3 w-3"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </a>
-            {{else}}
-              <a
-                @click.prevent
-                class="inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-white text-gray-900 hover:cursor-pointer rtl:rotate-180 dark:border-gray-800 dark:bg-gray-900 dark:text-white"
-              >
-                <span class="sr-only">Previous Page</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-3 w-3"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </a>
-            {{/if}}
-
-            <p class="text-xs text-gray-900 dark:text-white">
-              {{page.current}}
-              <span class="mx-0.25">/</span>
-              {{page.total}}
-            </p>
-
-            {{#if page.next}}
-              <a
-                class="inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180 dark:border-gray-800 dark:bg-gray-900 dark:text-white"
-                href="/products/{{category}}/?page={{page.next}}{{rawQuery}}"
-              >
-                <span class="sr-only">Next Page</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-3 w-3"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </a>
-            {{else}}
-              <a
-                @click.prevent
-                class="inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-white text-gray-900 hover:cursor-pointer rtl:rotate-180 dark:border-gray-800 dark:bg-gray-900 dark:text-white"
-              >
-                <span class="sr-only">Next Page</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-3 w-3"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </a>
-            {{/if}}
-          </nav>
-          <!-- Pagination -->
-        </div>
-      {{else}}
-        <div
-          class="grid h-full place-content-center dark:bg-slate-900 lg:col-span-3"
+      <div x-show="!$store.products.isEmpty()" class="lg:col-span-3">
+        <ul
+          :class="{ 'lg:grid-cols-3': '{{category}}' === 'laptops', 'lg:grid-cols-4': '{{category}}' === 'phones' }"
+          class="grid gap-6 sm:grid-cols-2"
         >
-          <div
-            class="flex flex-auto flex-col items-center justify-center p-4 md:p-5"
-          >
-            <svg
-              class="h-10 w-10 text-gray-500"
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+          <template x-for="product in $store.products.list" :key="product.id">
+            <li>
+              <a
+                :href="`/products/{{category}}/${product.id}`"
+                class="group block overflow-hidden"
+              >
+                <img
+                  :src="product.image"
+                  alt=""
+                  onerror="this.onerror=null; this.src='/images/placeholder/product.webp';"
+                  class="aspect-[3/2] object-cover transition duration-500 group-hover:scale-105 xsm:max-h-72"
+                />
+
+                <div class="relative bg-white pt-3">
+                  <h3
+                    x-text="product.name"
+                    class="text-xs text-gray-700 group-hover:underline group-hover:underline-offset-4"
+                  >
+                  </h3>
+
+                  <p class="mt-2">
+                    <span class="sr-only"> Regular Price </span>
+
+                    <span
+                      class="tracking-wider text-gray-900"
+                      x-text="product.price"
+                    >
+                    </span>
+                  </p>
+                </div>
+              </a>
+            </li>
+          </template>
+
+        </ul>
+
+        <!-- Pagination -->
+        <div
+          x-show="!$store.products.isEmpty()"
+          class="grid place-items-center p-3"
+        >
+          <nav class="inline-flex items-center justify-center gap-3">
+            <!-- Button: previous page -->
+            <button
+              @click="$store.products.update(await $store.page.go($store.page.prev));"
+              :disabled="!$store.page.prev"
+              class="inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180 dark:border-gray-800 dark:bg-gray-900 dark:text-white"
             >
-              <line x1="22" x2="2" y1="12" y2="12" />
-              <path
-                d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
-              />
-              <line x1="6" x2="6.01" y1="16" y2="16" />
-              <line x1="10" x2="10.01" y1="16" y2="16" />
-            </svg>
-            <p class="mt-5 text-sm text-gray-800 dark:text-gray-300">
-              No products to show
+              <span class="sr-only">Previous Page</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-3 w-3"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+            <!-- Previous Page -->
+
+            <!-- Current Page -->
+            <p class="text-xs text-gray-900 dark:text-white">
+              <span x-text="$store.page.current"></span>
+              <span class="mx-0.25">/</span>
+              <span x-text="$store.page.total"></span>
             </p>
-          </div>
+            <!-- Current Page -->
+
+            <!-- Next Page -->
+            <button
+              @click="$store.products.update(await $store.page.go($store.page.next));"
+              :disabled="!$store.page.next"
+              class="inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180 dark:border-gray-800 dark:bg-gray-900 dark:text-white"
+            >
+              <span class="sr-only">Next Page</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-3 w-3"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+            <!-- Button: next page -->
+          </nav>
         </div>
-      {{/if}}
+        <!-- Pagination -->
+      </div>
+
+      <div
+        x-show="$store.products.isEmpty()"
+        class="grid h-full place-content-center dark:bg-slate-900 lg:col-span-3"
+      >
+        <div
+          class="flex flex-auto flex-col items-center justify-center p-4 md:p-5"
+        >
+          <svg
+            class="h-10 w-10 text-gray-500"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="22" x2="2" y1="12" y2="12" />
+            <path
+              d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
+            />
+            <line x1="6" x2="6.01" y1="16" y2="16" />
+            <line x1="10" x2="10.01" y1="16" y2="16" />
+          </svg>
+          <p class="mt-5 text-sm text-gray-800 dark:text-gray-300">
+            No products to show
+          </p>
+        </div>
+      </div>
       <!-- Products -->
     </div>
   </div>
 </section>
+
+{{! prettier-ignore}}
+{{#content "script"}}
+<script>
+  document.addEventListener('alpine:init', () => {
+    Alpine.store("products", {
+      init() {
+        window.addEventListener("popstate", (event) => {
+          this.list = event.state.products;
+        });
+      },
+
+      list: {{{toString products}}},
+
+      isEmpty() {
+        return this.list.length === 0;
+      },
+
+      update(products) {
+        this.list = products;
+      },
+
+      async delete(id) {
+        try {
+          const response = await fetch(`/api/products/${id}`, {
+            method: "DELETE",
+          });
+
+          if (!response.ok) {
+            toast("Unable to delete product", { type: "danger" });
+            return;
+          }
+
+          toast("Product deleted", { type: "success" });
+          this.update(await Alpine.store('page').go());
+        } catch (err) {
+          toast("Something went wrong", { type: "danger" });
+          console.log(err);
+        }
+      }
+    });
+    Alpine.store("page", {
+      init() {
+        this.total = {{page.total}};
+        this.current = {{page.current}};
+
+        window.addEventListener("popstate", (event) => {
+          this.total = event.state.total;
+          this.current = event.state.current;
+        });
+      },
+
+      total: null,
+      current: null,
+
+      get prev() {
+        return this.current > 1 ? this.current - 1 : null;
+      },
+
+      get next() {
+        return this.current < this.total ? this.current + 1 : null;
+      },
+
+      async go(page=this.current) {
+        const searchParams = new URL(document.location).searchParams;
+        searchParams.set("page", page);
+        const queryString = searchParams.toString();
+
+        try {
+          const result = await fetch(`/api/products/{{category}}?${queryString}`);
+
+          if (result.ok) {
+            const data = await result.json();
+
+            history.pushState(data, "", window.location.href);
+
+            this.total = data.total;
+            this.current = data.current;
+
+            return data.productList;
+          }
+        } catch (err) {
+          toast("Something went wrong", { type: "danger"})
+          console.log(err);
+        }
+      }
+    });
+  })
+</script>
+{{/content}}
